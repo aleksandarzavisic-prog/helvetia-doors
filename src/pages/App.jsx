@@ -263,7 +263,7 @@ function Dashboard({ doors }) {
   );
 }
 
-/* ── Wood Elements Delivery ───────────────────────────────── */
+/* -- Wood Elements Delivery --------------------------------- */
 
 function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
   const [mode, setMode] = useState("frame"); // "frame" | "shutter" | "full_set"
