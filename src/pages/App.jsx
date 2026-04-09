@@ -25,7 +25,7 @@ const HW_KEYS = [
   "del_bowl_stopper","del_cyl_stopper",
 ];
 
-// Room â hardware type mapping
+// Room -> hardware type mapping
 const CYLINDER_ROOMS = /bedroom|store|storage|laundry|iron|toilet|maid/i;
 const KNOB_ROOMS     = /bathroom|bath|powder/i;
 
@@ -591,33 +591,33 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
     let unitLabel = "";
 
     if (hwType === "del_architraves") {
-      // Architraves: 4.5 pieces per door â floor to full doors only
+      // Architraves: 4.5 pieces per door -> floor to full doors only
       eligible = sorted.filter(d => !d.del_architraves);
       doorsToFill = Math.floor(qty / 4.5);
-      unitLabel = `${qty} architraves â ${Math.min(doorsToFill, eligible.length)} doors (4.5 per door)`;
+      unitLabel = `${qty} architraves -> ${Math.min(doorsToFill, eligible.length)} doors (4.5 per door)`;
     } else if (hwType === "del_hinges") {
       // Hinges: 3 pieces per door
       eligible = sorted.filter(d => !d.del_hinges);
       doorsToFill = Math.floor(qty / 3);
-      unitLabel = `${qty} hinges â ${Math.min(doorsToFill, eligible.length)} doors (3 per door)`;
+      unitLabel = `${qty} hinges -> ${Math.min(doorsToFill, eligible.length)} doors (3 per door)`;
     } else if (hwType === "del_cylinder") {
       eligible = sorted.filter(d => !d.del_cylinder && roomHwType(d.room) === "cylinder");
       doorsToFill = qty;
-      unitLabel = `${qty} cylinders â cylinder-type rooms only`;
+      unitLabel = `${qty} cylinders -> cylinder-type rooms only`;
     } else if (hwType === "del_knob") {
       eligible = sorted.filter(d => !d.del_knob && roomHwType(d.room) === "knob");
       doorsToFill = qty;
-      unitLabel = `${qty} knobs â knob-type rooms only`;
+      unitLabel = `${qty} knobs -> knob-type rooms only`;
     } else if (hwType === "del_bowl_stopper") {
       // Bowl stoppers go to cylinder rooms (bedrooms, storage, etc.)
       eligible = sorted.filter(d => !d.del_bowl_stopper && roomHwType(d.room) === "cylinder");
       doorsToFill = qty;
-      unitLabel = `${qty} bowl stoppers â cylinder rooms (bedrooms/storage/etc.)`;
+      unitLabel = `${qty} bowl stoppers -> cylinder rooms (bedrooms/storage/etc.)`;
     } else if (hwType === "del_cyl_stopper") {
       // Cylinder stoppers go to knob rooms (bathrooms, powder)
       eligible = sorted.filter(d => !d.del_cyl_stopper && roomHwType(d.room) === "knob");
       doorsToFill = qty;
-      unitLabel = `${qty} cyl. stoppers â knob rooms (bathrooms/powder)`;
+      unitLabel = `${qty} cyl. stoppers -> knob rooms (bathrooms/powder)`;
     } else {
       eligible = sorted.filter(d => !d[hwType]);
       doorsToFill = qty;
@@ -659,8 +659,8 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
       <div className="card" style={{marginBottom:12}}>
         <div style={{fontWeight:700,marginBottom:10}}>Bulk hardware distribution</div>
         <div className="small" style={{marginBottom:8,opacity:.7}}>
-          Enter quantity received (pieces) â auto-assigns to doors in ascending floor order.
-          Architraves: 4.5 per door. Hinges: 3 per door. Bowl stoppers â cylinder rooms. Cyl. stoppers â knob rooms.
+          Enter quantity received (pieces) -> auto-assigns to doors in ascending floor order.
+          Architraves: 4.5 per door. Hinges: 3 per door. Bowl stoppers -> cylinder rooms. Cyl. stoppers -> knob rooms.
         </div>
         <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",marginBottom:12,alignItems:"center"}}>
           <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div><div className="small" style={{fontWeight:700,opacity:.6}}>Assigned</div><div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
