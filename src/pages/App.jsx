@@ -126,7 +126,7 @@ export default function App() {
           <div style={{fontSize:18,fontWeight:800}}>Helvetia Doors</div>
           <div className="small">Delivery & installation tracking {"\u00b7"} v3.2.0</div>
         </div>
-        <button className="btn" onClick={load}>{loadin.g ? "Loading…" : "Refresh"}</button>
+        <button className="btn" onClick={load}>{loading ? "Loading…" : "Refresh"}</button>
       </div>
 
       {err && <div className="card" style={{marginTop:12}}><div style={{color:"#fecaca",fontWeight:700}}>Error</div><div className="small">{err}</div></div>}
