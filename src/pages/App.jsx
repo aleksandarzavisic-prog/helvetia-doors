@@ -100,7 +100,7 @@ export default function App() {
     if (!anyDel && merged.delivered_at && !patch.delivered_at) fullPatch.delivered_at = null;
     const { error } = await supabase.from("doors").update(fullPatch).eq("id", id);
     if (error) { alert(error.message); load(); return; }
-    setDoors(prev => prev.map(d => d.id === id ? { ...d, ...fullPatch } : d));
+    setDoors(prev => prev.map(d => d.id === id? { ...d, ...fullPatch } : d));
   };
 
   const bulkUpdate = async (updates) => {
@@ -124,9 +124,9 @@ export default function App() {
       <div className="row" style={{justifyContent:"space-between"}}>
         <div>
           <div style={{fontSize:18,fontWeight:800}}>Helvetia Doors</div>
-          <div className="small">Delivery & installation tracking {"\u00b7"} v3.1.0</div>
+          <div className="small">Delivery & installation tracking {"\u00b7"} v3.2.0</div>
         </div>
-        <button className="btn" onClick={load}>{loading ? "Loading…" : "Refresh"}</button>
+        <button className="btn" onClick={load}>{loadin.g ? "Loading…" : "Refresh"}</button>
       </div>
 
       {err && <div className="card" style={{marginTop:12}}><div style={{color:"#fecaca",fontWeight:700}}>Error</div><div className="small">{err}</div></div>}
@@ -154,6 +154,9 @@ function Dashboard({ doors }) {
       hinges:0, locks:0, cylinders:0, knobs:0,
       handles:0, bowlStoppers:0, cylStoppers:0,
     };
+    let cylinderRooms = 0, knobRooms = 0, doorDelivered = 0;
+    // Room-type installation counters
+    let cylInstalled = 0, knobInstalled = 0;
     s.total = doors.length;
     doors.forEach(d => {
       s[d.status] = (s[d.status]||0)+1;
@@ -167,8 +170,14 @@ function Dashboard({ doors }) {
       if (d.del_handle) delItems.handles++;
       if (d.del_bowl_stopper) delItems.bowlStoppers++;
       if (d.del_cyl_stopper) delItems.cylStoppers++;
+      // Count room types
+      const hwt = roomHwType(d.room);
+      if (hwt === "cylinder") { cylinderRooms++; if (d.status === "INSTALLED") cylInstalled++; }
+      else { knobRooms++; if (d.status === "INSTALLED") knobInstalled++; }
+      // Door is "delivered" when frame + shutter + architraves all delivered
+      if (d.del_frame && d.del_shutter && d.del_architraves) doorDelivered++;
     });
-    return { ...s, delItems };
+    return { ...s, delItems, cylinderRooms, knobRooms, doorDelivered, cylInstalled, knobInstalled };
   }, [doors]);
 
   const byFloor = useMemo(() => {
@@ -178,7 +187,7 @@ function Dashboard({ doors }) {
       const r = m.get(d.floor);
       r.total++;
       if (d.status === "INSTALLED") r.installed++;
-      if (d.delivered_at) r.delivered++;
+      if (d.del_frame && d.del_shutter && d.del_architraves) r.delivered++;
     });
     return Array.from(m.entries()).sort((a,b)=>a[0]-b[0]).map(([k,v])=>({floor:k,...v}));
   }, [doors]);
@@ -190,25 +199,46 @@ function Dashboard({ doors }) {
       <div className="row" style={{marginBottom:12}}>
         <div className="stat"><div className="l">Total</div><div className="n">{stats.total}</div></div>
         <div className="stat"><div className="l">Pending</div><div className="n">{stats.PENDING}</div></div>
-        <div className="stat"><div className="l">Delivered</div><div className="n">{stats.DELIVERED}</div></div>
+        <div className="stat"><div className="l">Delivered</div><div className="n">{stats.doorDelivered}</div></div>
         <div className="stat"><div className="l">In progress</div><div className="n">{stats.IN_PROGRESS}</div></div>
         <div className="stat"><div className="l">Installed</div><div className="n">{stats.INSTALLED}</div></div>
         <div className="stat"><div className="l">Snagged</div><div className="n">{stats.SNAGGED}</div></div>
       </div>
 
       <div className="card">
-        <div style={{fontWeight:700,marginBottom:10}}>Delivery summary</div>
-        <div className="kv" style={{gap:"6px 16px"}}>
-          <div className="small">Frames</div><div>{di.frames}/{total}</div>
-          <div className="small">Shutters</div><div>{di.shutters}/{total}</div>
-          <div className="small">Architraves</div><div>{di.architraves}/{total}</div>
-          <div className="small">Hinges</div><div>{di.hinges}/{total}</div>
-          <div className="small">Locks</div><div>{di.locks}/{total}</div>
-          <div className="small">Cylinders</div><div>{di.cylinders}/{total}</div>
-          <div className="small">Knobs</div><div>{di.knobs}/{total}</div>
-          <div className="small">Handle sets</div><div>{di.handles}/{total}</div>
-          <div className="small">Bowl stoppers</div><div>{di.bowlStoppers}/{total}</div>
-          <div className="small">Cyl. stoppers</div><div>{di.cylStoppers}/{total}</div>
+        <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+          <div style={{flex:"1 1 280px"}}>
+            <div style={{fontWeight:700,marginBottom:10}}>Delivery summary</div>
+            <div className="small" style={{marginBottom:8,opacity:.7}}>Doors delivered (frame+shutter+architraves): <b style={{color:"#86efac"}}>{stats.doorDelivered}</b> / {total}</div>
+            <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",alignItems:"center"}}>
+              <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div><div className="small" style={{fontWeight:700,opacity:.6}}>Delivered</div><div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
+              <div className="small">Frames</div><div>{di.frames}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.frames}</div>
+              <div className="small">Shutters</div><div>{di.shutters}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.shutters}</div>
+              <div className="small">Architraves</div><div>{di.architraves}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.architraves}</div>
+              <div className="small">Hinges</div><div>{di.hinges}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.hinges}</div>
+              <div className="small">Locks</div><div>{di.locks}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.locks}</div>
+              <div className="small">Cylinders</div><div>{di.cylinders}/{stats.cylinderRooms}</div><div style={{color:"#fca5a5"}}>{stats.cylinderRooms-di.cylinders}</div>
+              <div className="small">Knobs</div><div>{di.knobs}/{stats.knobRooms}</div><div style={{color:"#fca5a5"}}>{stats.knobRooms-di.knobs}</div>
+              <div className="small">Handle sets</div><div>{di.handles}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.handles}</div>
+              <div className="small">Bowl stoppers</div><div>{di.bowlStoppers}/{stats.cylinderRooms}</div><div style={{color:"#fca5a5"}}>{stats.cylinderRooms-di.bowlStoppers}</div>
+              <div className="small">Cyl. stoppers</div><div>{di.cylStoppers}/{stats.knobRooms}</div><div style={{color:"#fca5a5"}}>{stats.knobRooms-di.cylStoppers}</div>
+            </div>
+          </div>
+          <div style={{flex:"0 0 auto",minWidth:200}}>
+            <div style={{fontWeight:700,marginBottom:10}}>By room type</div>
+            <div className="card" style={{padding:"10px 14px",marginBottom:8}}>
+              <div className="small" style={{fontWeight:700,marginBottom:4}}>Cylinder rooms</div>
+              <div className="small" style={{opacity:.6,marginBottom:6}}>Bedrooms, storage, laundry, maid, iron, toilet</div>
+              <div style={{fontSize:18,fontWeight:700}}>{stats.cylInstalled} <span style={{fontWeight:400,fontSize:14,opacity:.6}}>/ {stats.cylinderRooms} installed</span></div>
+              <div className="bar" style={{marginTop:6}}><span style={{width:`${(stats.cylInstalled/(stats.cylinderRooms||1))*100}%`}}/></div>
+            </div>
+            <div className="card" style={{padding:"10px 14px"}}>
+              <div className="small" style={{fontWeight:700,marginBottom:4}}>Knob rooms</div>
+              <div className="small" style={{opacity:.6,marginBottom:6}}>Bathrooms, powder rooms</div>
+              <div style={{fontSize:18,fontWeight:700}}>{stats.knobInstalled} <span style={{fontWeight:400,fontSize:14,opacity:.6}}>/ {stats.knobRooms} installed</span></div>
+              <div className="bar" style={{marginTop:6}}><span style={{width:`${(stats.knobInstalled/(stats.knobRooms||1))*100}%`}}/></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -273,6 +303,19 @@ function DeliveryTab({ doors, types, onUpdate, onBulk }) {
     const s = {};
     HW_KEYS.forEach(k => { s[k] = doors.filter(d => d[k]).length; });
     return s;
+  }, [doors]);
+
+  // Correct totals per hardware type (not all doors need every item)
+  const hwTotals = useMemo(() => {
+    const cylCount = doors.filter(d => roomHwType(d.room) === "cylinder").length;
+    const knobCount = doors.filter(d => roomHwType(d.room) === "knob").length;
+    const all = doors.length;
+    return {
+      del_architraves: all, del_hinges: all, del_lock: all,
+      del_cylinder: cylCount, del_knob: knobCount,
+      del_handle: all,
+      del_bowl_stopper: cylCount, del_cyl_stopper: knobCount,
+    };
   }, [doors]);
 
   const hwLabels = {
@@ -367,11 +410,13 @@ function DeliveryTab({ doors, types, onUpdate, onBulk }) {
           Enter quantity received (pieces) → auto-assigns to doors in ascending floor order.
           Architraves: 4.5 per door. Hinges: 3 per door. Bowl stoppers → cylinder rooms. Cyl. stoppers → knob rooms.
         </div>
-        <div className="kv" style={{gap:"4px 16px",marginBottom:12}}>
+        <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",marginBottom:12,alignItems:"center"}}>
+          <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div><div className="small" style={{fontWeight:700,opacity:.6}}>Assigned</div><div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
           {Object.entries(hwLabels).map(([k,label]) => (
             <React.Fragment key={k}>
               <div className="small">{label}</div>
-              <div>{hwSummary[k]} / {doors.length} assigned</div>
+              <div>{hwSummary[k]} / {hwTotals[k]}</div>
+              <div style={{color:"#fca5a5"}}>{hwTotals[k] - hwSummary[k]}</div>
             </React.Fragment>
           ))}
         </div>
