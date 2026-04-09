@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "../supabaseClient";
 
-/* Ã¢ÂÂÃ¢ÂÂ constants Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ constants âââââââââââââââââââââââââââââââââââââââââââââââ */
 
 const INSTALL_CHECKLIST = [
   ["frame_installed",       "Frame"],
@@ -25,7 +25,7 @@ const HW_KEYS = [
   "del_bowl_stopper","del_cyl_stopper",
 ];
 
-// Room Ã¢ÂÂ hardware type mapping
+// Room â hardware type mapping
 const CYLINDER_ROOMS = /bedroom|store|storage|laundry|iron|toilet|maid/i;
 const KNOB_ROOMS     = /bathroom|bath|powder/i;
 
@@ -58,10 +58,10 @@ function deriveStatus(d) {
   return "PENDING";
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ Supabase URL for storage Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ Supabase URL for storage âââââââââââââââââââââââââââââââ */
 const SUPABASE_URL = "https://kwwgkjrcafbzjxpmyykd.supabase.co";
 
-/* Ã¢ÂÂÃ¢ÂÂ App shell Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ App shell âââââââââââââââââââââââââââââââââââââââââââââââ */
 
 export default function App() {
   const [tab, setTab] = useState("dashboard");
@@ -127,7 +127,7 @@ export default function App() {
           <div style={{fontSize:18,fontWeight:800}}>Helvetia Doors</div>
           <div className="small">Delivery & installation tracking {"\u00b7"} v3.3.0</div>
         </div>
-        <button className="btn" onClick={load}>{loading ? "LoadingÃ¢ÂÂ¦" : "Refresh"}</button>
+        <button className="btn" onClick={load}>{loading ? "Loadingâ¦" : "Refresh"}</button>
       </div>
 
       {err && <div className="card" style={{marginTop:12}}><div style={{color:"#fecaca",fontWeight:700}}>Error</div><div className="small">{err}</div></div>}
@@ -145,7 +145,7 @@ export default function App() {
   );
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ Dashboard Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ Dashboard âââââââââââââââââââââââââââââââââââââââââââââââ */
 
 function Dashboard({ doors }) {
   const stats = useMemo(() => {
@@ -253,7 +253,7 @@ function Dashboard({ doors }) {
           <div key={f.floor} style={{marginBottom:10}}>
             <div className="row" style={{justifyContent:"space-between",marginBottom:4}}>
               <div className="small" style={{fontWeight:700,opacity:1}}>{f.label}</div>
-              <div className="small">{f.installed}/{f.total} installed ÃÂ· {f.delivered}/{f.total} delivered</div>
+              <div className="small">{f.installed}/{f.total} installed · {f.delivered}/{f.total} delivered</div>
             </div>
             <div className="bar"><span style={{width:`${(f.installed/f.total)*100}%`}}/></div>
           </div>
@@ -263,7 +263,7 @@ function Dashboard({ doors }) {
   );
 }
 
-/* ââ Wood Elements Delivery âââââââââââââââââââââââââââââââââ */
+/* ── Wood Elements Delivery ───────────────────────────────── */
 
 function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
   const [mode, setMode] = useState("frame"); // "frame" | "shutter" | "full_set"
@@ -511,7 +511,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
   );
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ Delivery Tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ Delivery Tab ââââââââââââââââââââââââââââââââââââââââââââ */
 
 function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpWoodKey }) {
   const [floor, setFloor] = useState("");
@@ -591,33 +591,33 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
     let unitLabel = "";
 
     if (hwType === "del_architraves") {
-      // Architraves: 4.5 pieces per door Ã¢ÂÂ floor to full doors only
+      // Architraves: 4.5 pieces per door â floor to full doors only
       eligible = sorted.filter(d => !d.del_architraves);
       doorsToFill = Math.floor(qty / 4.5);
-      unitLabel = `${qty} architraves Ã¢ÂÂ ${Math.min(doorsToFill, eligible.length)} doors (4.5 per door)`;
+      unitLabel = `${qty} architraves â ${Math.min(doorsToFill, eligible.length)} doors (4.5 per door)`;
     } else if (hwType === "del_hinges") {
       // Hinges: 3 pieces per door
       eligible = sorted.filter(d => !d.del_hinges);
       doorsToFill = Math.floor(qty / 3);
-      unitLabel = `${qty} hinges Ã¢ÂÂ ${Math.min(doorsToFill, eligible.length)} doors (3 per door)`;
+      unitLabel = `${qty} hinges â ${Math.min(doorsToFill, eligible.length)} doors (3 per door)`;
     } else if (hwType === "del_cylinder") {
       eligible = sorted.filter(d => !d.del_cylinder && roomHwType(d.room) === "cylinder");
       doorsToFill = qty;
-      unitLabel = `${qty} cylinders Ã¢ÂÂ cylinder-type rooms only`;
+      unitLabel = `${qty} cylinders â cylinder-type rooms only`;
     } else if (hwType === "del_knob") {
       eligible = sorted.filter(d => !d.del_knob && roomHwType(d.room) === "knob");
       doorsToFill = qty;
-      unitLabel = `${qty} knobs Ã¢ÂÂ knob-type rooms only`;
+      unitLabel = `${qty} knobs â knob-type rooms only`;
     } else if (hwType === "del_bowl_stopper") {
       // Bowl stoppers go to cylinder rooms (bedrooms, storage, etc.)
       eligible = sorted.filter(d => !d.del_bowl_stopper && roomHwType(d.room) === "cylinder");
       doorsToFill = qty;
-      unitLabel = `${qty} bowl stoppers Ã¢ÂÂ cylinder rooms (bedrooms/storage/etc.)`;
+      unitLabel = `${qty} bowl stoppers â cylinder rooms (bedrooms/storage/etc.)`;
     } else if (hwType === "del_cyl_stopper") {
       // Cylinder stoppers go to knob rooms (bathrooms, powder)
       eligible = sorted.filter(d => !d.del_cyl_stopper && roomHwType(d.room) === "knob");
       doorsToFill = qty;
-      unitLabel = `${qty} cyl. stoppers Ã¢ÂÂ knob rooms (bathrooms/powder)`;
+      unitLabel = `${qty} cyl. stoppers â knob rooms (bathrooms/powder)`;
     } else {
       eligible = sorted.filter(d => !d[hwType]);
       doorsToFill = qty;
@@ -659,8 +659,8 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
       <div className="card" style={{marginBottom:12}}>
         <div style={{fontWeight:700,marginBottom:10}}>Bulk hardware distribution</div>
         <div className="small" style={{marginBottom:8,opacity:.7}}>
-          Enter quantity received (pieces) Ã¢ÂÂ auto-assigns to doors in ascending floor order.
-          Architraves: 4.5 per door. Hinges: 3 per door. Bowl stoppers Ã¢ÂÂ cylinder rooms. Cyl. stoppers Ã¢ÂÂ knob rooms.
+          Enter quantity received (pieces) â auto-assigns to doors in ascending floor order.
+          Architraves: 4.5 per door. Hinges: 3 per door. Bowl stoppers â cylinder rooms. Cyl. stoppers â knob rooms.
         </div>
         <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",marginBottom:12,alignItems:"center"}}>
           <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div><div className="small" style={{fontWeight:700,opacity:.6}}>Assigned</div><div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
@@ -686,12 +686,12 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
                    style={{width:"100%",minWidth:0}}/>
           </div>
           <button className="btn primary" disabled={distributing || reversing || !hwQty} onClick={distribute}>
-            {distributing ? "DistributingÃ¢ÂÂ¦" : "Distribute"}
+            {distributing ? "Distributingâ¦" : "Distribute"}
           </button>
           {lastDist && (
             <button className="btn" disabled={reversing || distributing} onClick={reverseLastDist}
                     style={{borderColor:"rgba(239,68,68,.5)",color:"#fca5a5"}}>
-              {reversing ? "ReversingÃ¢ÂÂ¦" : "Undo last"}
+              {reversing ? "Reversingâ¦" : "Undo last"}
             </button>
           )}
         </div>
@@ -756,7 +756,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             })}
           </tbody>
         </table>
-        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 Ã¢ÂÂ narrow filters to see more)</div>}
+        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 â narrow filters to see more)</div>}
       </div>
     </>
   );
@@ -770,8 +770,8 @@ function DeliveryDetail({ door, onUpdate }) {
     <div style={{padding:"10px 4px"}}>
       <div className="kv">
         <div className="small">QR code</div><div className="small"><code>{door.qr_code}</code></div>
-        <div className="small">Floor / Apt</div><div>{door.floor_label} ÃÂ· {door.apt_no}</div>
-        <div className="small">Room</div><div>{door.room || "Ã¢ÂÂ"}</div>
+        <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
+        <div className="small">Room</div><div>{door.room || "â"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
         <div className="small">Hardware type</div><div>{hwType === "knob" ? "Knob + Cyl. stopper" : "Cylinder + Bowl stopper"}</div>
       </div>
@@ -807,7 +807,7 @@ function DeliveryDetail({ door, onUpdate }) {
   );
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ Installation Tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ Installation Tab ââââââââââââââââââââââââââââââââââââââââ */
 
 function InstallTab({ doors, types, onUpdate, onRefresh }) {
   const [floor, setFloor] = useState("");
@@ -857,7 +857,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
             <option value="">All statuses</option>
             {["PENDING","DELIVERED","IN_PROGRESS","INSTALLED","SNAGGED"].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="input" placeholder="Search qr / apt / roomÃ¢ÂÂ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1}}/>
+          <input className="input" placeholder="Search qr / apt / roomâ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1}}/>
           <button className={`tab ${missingOnly?"active":""}`} onClick={()=>setMissingOnly(v=>!v)} style={{padding:"10px 12px"}}>Missing dims</button>
         </div>
         <div className="small" style={{marginTop:8}}>Showing {filtered.length} of {doors.length}</div>
@@ -890,7 +890,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
             ))}
           </tbody>
         </table>
-        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 Ã¢ÂÂ narrow filters to see more)</div>}
+        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 â narrow filters to see more)</div>}
       </div>
     </>
   );
@@ -913,8 +913,8 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
     <div style={{padding:"10px 4px"}}>
       <div className="kv">
         <div className="small">QR code</div><div className="small"><code>{door.qr_code}</code></div>
-        <div className="small">Floor / Apt</div><div>{door.floor_label} ÃÂ· {door.apt_no}</div>
-        <div className="small">Room</div><div>{door.room || "Ã¢ÂÂ"}</div>
+        <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
+        <div className="small">Room</div><div>{door.room || "â"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
         <div className="small">Status</div><div><span className={`pill ${door.status}`}>{door.status.replace("_"," ")}</span></div>
       </div>
@@ -980,7 +980,7 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
   );
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ Snag Photos Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ Snag Photos ââââââââââââââââââââââââââââââââââââââââââââ */
 
 function SnagPhotos({ door, onUpdate, onRefresh }) {
   const fileRef = useRef(null);
@@ -1029,7 +1029,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
         onRefresh();
       }
     } else {
-      setUploadMsg("Upload failed Ã¢ÂÂ check console");
+      setUploadMsg("Upload failed â check console");
     }
 
     setUploading(false);
@@ -1055,7 +1055,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
       <div className="row" style={{justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <div style={{fontWeight:600,fontSize:13}}>Snag photos ({photos.length})</div>
         <label className="btn primary" style={{cursor:"pointer",display:"inline-flex",alignItems:"center",gap:6}}>
-          {uploading ? "UploadingÃ¢ÂÂ¦" : "Attach photo"}
+          {uploading ? "Uploadingâ¦" : "Attach photo"}
           <input
             ref={fileRef}
             type="file"
@@ -1097,7 +1097,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
   );
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ Shared: DimEditor Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ââ Shared: DimEditor âââââââââââââââââââââââââââââââââââââââ */
 
 function DimEditor({ door, onUpdate }) {
   const [w, setW] = useState(door.final_width_mm ?? "");
@@ -1136,21 +1136,21 @@ function DimEditor({ door, onUpdate }) {
       <div className="row" style={{alignItems:"flex-end"}}>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Width</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Ã¢ÂÂ"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="â"
                  value={w} onChange={dimChange(setW)} style={{width:"100%",minWidth:0}}/>
         </div>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Height</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Ã¢ÂÂ"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="â"
                  value={h} onChange={dimChange(setH)} style={{width:"100%",minWidth:0}}/>
         </div>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Thickness</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Ã¢ÂÂ"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="â"
                  value={t} onChange={dimChange(setT)} style={{width:"100%",minWidth:0}}/>
         </div>
         <button className={`btn ${dirty?"primary":""}`} disabled={!dirty||saving} onClick={save}>
-          {saving ? "SavingÃ¢ÂÂ¦" : dirty ? "Save" : "Saved"}
+          {saving ? "Savingâ¦" : dirty ? "Save" : "Saved"}
         </button>
       </div>
     </div>
