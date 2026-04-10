@@ -716,6 +716,54 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             {apts.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
+        {/* Floor wood delivery summary */}
+        <div style={{marginTop:12,marginBottom:12,overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+            <thead>
+              <tr style={{borderBottom:"1px solid #334155",textAlign:"left"}}>
+                <th style={{padding:"6px 8px",fontWeight:600}}>Floor</th>
+                <th style={{padding:"6px 8px",fontWeight:600}}>Frames</th>
+                <th style={{padding:"6px 8px",fontWeight:600}}>Shutters</th>
+                <th style={{padding:"6px 8px",fontWeight:600}}>Remaining</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(() => {
+                const fm = {};
+                doors.forEach(d => {
+                  const fl = d.floor_label || "Unknown";
+                  if (!fm[fl]) fm[fl] = {fr:0,frT:0,sh:0,shT:0,ord:d.floor||0};
+                  fm[fl].frT++; fm[fl].shT++;
+                  if (d.del_frame) fm[fl].fr++;
+                  if (d.del_shutter) fm[fl].sh++;
+                });
+                return Object.entries(fm)
+                  .sort((a,b) => a[1].ord - b[1].ord)
+                  .map(([fl, s]) => {
+                    const remFr = s.frT - s.fr;
+                    const remSh = s.shT - s.sh;
+                    const total = remFr + remSh;
+                    const allDone = total === 0;
+                    return (
+                      <tr key={fl} style={{borderBottom:"1px solid #1e293b",opacity:allDone?0.5:1}}>
+                        <td style={{padding:"5px 8px",fontWeight:500}}>{fl}</td>
+                        <td style={{padding:"5px 8px"}}>
+                          <span style={{color:remFr===0?"#22c55e":"#f59e0b"}}>{s.fr}/{s.frT}</span>
+                        </td>
+                        <td style={{padding:"5px 8px"}}>
+                          <span style={{color:remSh===0?"#22c55e":"#f59e0b"}}>{s.sh}/{s.shT}</span>
+                        </td>
+                        <td style={{padding:"5px 8px"}}>
+                          {allDone ? <span style={{color:"#22c55e"}}>All delivered</span>
+                            : <span style={{color:"#ef4444"}}>{total} remaining ({remFr} frames, {remSh} shutters)</span>}
+                        </td>
+                      </tr>
+                    );
+                  });
+              })()}
+            </tbody>
+          </table>
+        </div>
         <div className="small" style={{marginTop:8}}>Showing {filtered.length} of {doors.length}</div>
       </div>
 
