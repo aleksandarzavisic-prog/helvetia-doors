@@ -764,14 +764,14 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             </tbody>
           </table>
         </div>
-        <div className="small" style={{marginTop:8}}>Showing {filtered.length} of {doors.length}</div>
+        <div className="small" style={{marginTop:8}}>Showing {Math.min(50, filtered.length)} of {filtered.length} (filtered from {doors.length})</div>
       </div>
 
       <div className="card">
         <table className="table">
           <thead><tr><th>Floor</th><th>Apt</th><th>Room</th><th>Type</th><th>Delivery</th><th></th></tr></thead>
           <tbody>
-            {filtered.slice(0, 300).map(d => {
+            {filtered.slice(0, 50).map(d => {
               const delDone = DEL_ITEMS.filter(([k]) => d[k]).length;
               const hwApplicable = applicableHwKeys(d.room);
               const hwDone = hwApplicable.filter(k => d[k]).length;
