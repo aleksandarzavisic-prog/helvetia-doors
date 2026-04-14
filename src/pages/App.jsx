@@ -527,6 +527,8 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   const [lastDist, setLastDist] = useState(null); // { hwType, doorIds, label }
   const [reversing, setReversing] = useState(false);
   const [dPage, setDPage] = useState(0);
+  const [pdFloor, setPdFloor] = useState("");
+  const [pdApt, setPdApt] = useState("");
   const DPAGE_SIZE = 100;
 
   const floors = useMemo(() => {
@@ -542,7 +544,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   }, [doors, floor]);
 
   const filtered = useMemo(() => {
-  useEffect(() => { setDPage(0); }, [floor, apt]);
+  useEffect(() => { setDPage(0); }, [pdFloor, pdApt]);
     return doors.filter(d => {
       if (floor !== "" && String(d.floor) !== floor) return false;
       if (apt   !== "" && d.apt_no !== apt) return false;
@@ -710,11 +712,11 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
       <div className="card" style={{marginBottom:12}}>
         <div style={{fontWeight:700,marginBottom:8}}>Per-door delivery items</div>
         <div className="row">
-          <select className="input" value={floor} onChange={e=>{setFloor(e.target.value); setApt("");}} style={{minWidth:140}}>
+          <select className="input" value={pdFloor} onChange={e=>{setPdFloor(e.target.value); setApt("");}} style={{minWidth:140}}>
             <option value="">All floors</option>
             {floors.map(([k,label]) => <option key={k} value={k}>{label}</option>)}
           </select>
-          <select className="input" value={apt} onChange={e=>setApt(e.target.value)} style={{minWidth:140}}>
+          <select className="input" value={pdApt} onChange={e=>setPdApt(e.target.value)} style={{minWidth:140}}>
             <option value="">All apts</option>
             {apts.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
