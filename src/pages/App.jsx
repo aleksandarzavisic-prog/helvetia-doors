@@ -544,7 +544,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   }, [doors, floor]);
 
   const filtered = useMemo(() => doors.filter(d => (!pdFloor || String(d.floor) === pdFloor) && (!pdApt || d.apt_no === pdApt)), [doors, pdFloor, pdApt]);
-  const pdApts = useMemo(() => { const s = new Set(); doors.filter(d => !pdFloor || String(d.floor) === pdFloor).forEach(d => s.add(d.apt_no)); return Array.from(s).sort(); }, [doors, pdFloor]);
+  const pdApts = useMemo(() => [...new Set(doors.filter(d => !pdFloor || String(d.floor) === pdFloor).map(d => d.apt_no))].sort(), [doors, pdFloor])
   useEffect(() => { setDPage(0); setPdApt(""); }, [pdFloor]);
   useEffect(() => { setDPage(0); }, [pdApt]);
     return doors.filter(d => {
