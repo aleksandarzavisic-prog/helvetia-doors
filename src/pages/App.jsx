@@ -774,8 +774,9 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
 
       <div className="card">
         <table className="table">
-          <thead><tr><th>Floor</th><th>Apt</th><th>Room</th><th>Type</th><th style={{padding:"4px 6px",textAlign:"center"}}>Frame</th>
-              <th style={{padding:"4px 6px",textAlign:"center"}}>Shutter</th><th></th></tr></thead>
+          <thead><tr><th>Floor</th><th>Apt</th><th>Room</th><th>Type</th><th style={{padding:"4px 6px",textAlign:"center"}}>Elements</th>
+              <th style={{padding:"4px 6px",textAlign:"center"}}>Frame</th>
+              <th style={{padding:"4px 6px",textAlign:"center"}}>Shutter</th></tr></thead>
           <tbody>
             {filtered.slice(dPage * DPAGE_SIZE, (dPage + 1) * DPAGE_SIZE).map(d => {
               const delDone = DEL_ITEMS.filter(([k]) => d[k]).length;
