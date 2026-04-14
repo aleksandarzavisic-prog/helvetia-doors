@@ -547,12 +547,6 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   const pdApts = useMemo(() => [...new Set(doors.filter(d => !pdFloor || String(d.floor) === pdFloor).map(d => d.apt_no))].sort(), [doors, pdFloor]);
   useEffect(() => { setDPage(0); setPdApt(""); }, [pdFloor]);
   useEffect(() => { setDPage(0); }, [pdApt]);
-    return doors.filter(d => {
-      if (floor !== "" && String(d.floor) !== floor) return false;
-      if (apt   !== "" && d.apt_no !== apt) return false;
-      return true;
-    });
-  }, [doors, floor, apt]);
 
   // Hardware summary
   const hwSummary = useMemo(() => {
