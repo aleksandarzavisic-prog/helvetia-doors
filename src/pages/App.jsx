@@ -543,8 +543,10 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
     return Array.from(s).sort();
   }, [doors, floor]);
 
-  const filtered = useMemo(() => {
-  useEffect(() => { setDPage(0); }, [pdFloor, pdApt]);
+  const filtered = useMemo(() => doors.filter(d => (!pdFloor || String(d.floor) === pdFloor) && (!pdApt || d.apt_no === pdApt)), [doors, pdFloor, pdApt]);
+  const pdApts = useMemo(() => { const s = new Set(); doors.filter(d => !pdFloor || String(d.floor) === pdFloor).forEach(d => s.add(d.apt_no)); return Array.from(s).sort(); }, [doors, pdFloor]);
+  useEffect(() => { setDPage(0); setPdApt(""); }, [pdFloor]);
+  useEffect(() => { setDPage(0); }, [pdApt]);
     return doors.filter(d => {
       if (floor !== "" && String(d.floor) !== floor) return false;
       if (apt   !== "" && d.apt_no !== apt) return false;
@@ -718,7 +720,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
           </select>
           <select className="input" value={pdApt} onChange={e=>setPdApt(e.target.value)} style={{minWidth:140}}>
             <option value="">All apts</option>
-            {apts.map(a => <option key={a} value={a}>{a}</option>)}
+            {pdApts.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         {/* Floor wood delivery summary */}
