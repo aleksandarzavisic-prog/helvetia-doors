@@ -526,6 +526,8 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   // Track last distribution for undo
   const [lastDist, setLastDist] = useState(null); // { hwType, doorIds, label }
   const [reversing, setReversing] = useState(false);
+  const [dPage, setDPage] = useState(0);
+  const DPAGE_SIZE = 100;
 
   const floors = useMemo(() => {
     const m = new Map();
@@ -540,6 +542,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   }, [doors, floor]);
 
   const filtered = useMemo(() => {
+  useEffect(() => { setDPage(0); }, [selFloorFilter, selAptFilter]);
     return doors.filter(d => {
       if (floor !== "" && String(d.floor) !== floor) return false;
       if (apt   !== "" && d.apt_no !== apt) return false;
@@ -764,14 +767,19 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             </tbody>
           </table>
         </div>
-        <div className="small" style={{marginTop:8}}>Showing {Math.min(50, filtered.length)} of {filtered.length} (filtered from {doors.length})</div>
+        <div className="small" style={{marginTop:8}}>Page {dPage + 1} of {Math.ceil(filtered.length / DPAGE_SIZE) || 1} — {filtered.length} doors</div>
+        <div style={{display:"flex",gap:8,marginTop:4,marginBottom:4}}>
+          <button onClick={() => setDPage(p => Math.max(0, p-1))} disabled={dPage === 0} style={{padding:"4px 12px",borderRadius:4,border:"1px solid #475569",background:dPage===0?"#1e293b":"#334155",color:"#e2e8f0",cursor:dPage===0?"not-allowed":"pointer"}}>Prev</button>
+          <button onClick={() => setDPage(p => Math.min(Math.ceil(filtered.length/DPAGE_SIZE)-1, p+1))} disabled={(dPage+1)*DPAGE_SIZE >= filtered.length} style={{padding:"4px 12px",borderRadius:4,border:"1px solid #475569",background:(dPage+1)*DPAGE_SIZE>=filtered.length?"#1e293b":"#334155",color:"#e2e8f0",cursor:(dPage+1)*DPAGE_SIZE>=filtered.length?"not-allowed":"pointer"}}>Next</button>
+        </div>
       </div>
 
       <div className="card">
         <table className="table">
-          <thead><tr><th>Floor</th><th>Apt</th><th>Room</th><th>Type</th><th>Delivery</th><th></th></tr></thead>
+          <thead><tr><th>Floor</th><th>Apt</th><th>Room</th><th>Type</th><th style={{padding:"4px 6px",textAlign:"center"}}>Frame</th>
+              <th style={{padding:"4px 6px",textAlign:"center"}}>Shutter</th><th></th></tr></thead>
           <tbody>
-            {filtered.slice(0, 50).map(d => {
+            {filtered.slice(dPage * DPAGE_SIZE, (dPage + 1) * DPAGE_SIZE).map(d => {
               const delDone = DEL_ITEMS.filter(([k]) => d[k]).length;
               const hwApplicable = applicableHwKeys(d.room);
               const hwDone = hwApplicable.filter(k => d[k]).length;
@@ -788,11 +796,12 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
                         {totalDone}/{DELIVERY_TOTAL}
                       </span>
                     </td>
-                    <td style={{textAlign:"right"}}>
-                      <button className="btn" onClick={()=>setOpenId(openId===d.id?null:d.id)}>
-                        {openId===d.id ? "Close" : "Open"}
-                      </button>
-                    </td>
+                    <td style={{padding:"4px 6px",textAlign:"center"}}>
+                  {d.del_frame ? <span style={{color:"#22c55e"}}>Y</span> : <span style={{color:"#ef4444"}}>N</span>}
+                </td>
+                <td style={{padding:"4px 6px",textAlign:"center"}}>
+                  {d.del_shutter ? <span style={{color:"#22c55e"}}>Y</span> : <span style={{color:"#ef4444"}}>N</span>}
+                </td>
                   </tr>
                   {openId === d.id && (
                     <tr><td colSpan={6} style={{background:"#0b1220"}}>
