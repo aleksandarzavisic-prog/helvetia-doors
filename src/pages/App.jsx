@@ -542,7 +542,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   }, [doors, floor]);
 
   const filtered = useMemo(() => {
-  useEffect(() => { setDPage(0); }, [selFloorFilter, selAptFilter]);
+  useEffect(() => { setDPage(0); }, [floor, apt]);
     return doors.filter(d => {
       if (floor !== "" && String(d.floor) !== floor) return false;
       if (apt   !== "" && d.apt_no !== apt) return false;
