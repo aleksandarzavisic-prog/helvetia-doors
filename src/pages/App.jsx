@@ -12,6 +12,13 @@ const INSTALL_CHECKLIST = [
   ["stopper_installed",     "Door stopper"],
 ];
 
+function applicableInstallChecklist(room) {
+  if (NO_STOPPER_ROOMS.test(room || "")) {
+    return INSTALL_CHECKLIST.filter(([k]) => k !== "stopper_installed");
+  }
+  return INSTALL_CHECKLIST;
+}
+
 // Per-door items checked individually on delivery (frame + shutter only now)
 const DEL_ITEMS = [
   ["del_frame",   "Frame"],
@@ -55,8 +62,9 @@ function deliveryTotal(room) { return 2 + applicableHwKeys(room).length; }
 
 function deriveStatus(d) {
   if (d.status === "SNAGGED") return "SNAGGED";
-  const done = INSTALL_CHECKLIST.filter(([k]) => d[k]).length;
-  if (done === 6) return "INSTALLED";
+  const checklist = applicableInstallChecklist(d.room);
+  const done = checklist.filter(([k]) => d[k]).length;
+  if (done === checklist.length) return "INSTALLED";
   if (done > 0)   return "IN_PROGRESS";
   if (d.delivered_at) return "DELIVERED";
   return "PENDING";
@@ -958,7 +966,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
 
 function InstallDetail({ door, onUpdate, onRefresh }) {
   const toggle = (key) => onUpdate(door.id, { [key]: !door[key] });
-  const doneCount = INSTALL_CHECKLIST.filter(([k]) => door[k]).length;
+  const doneCount = applicableInstallChecklist(door.room).filter(([k]) => door[k]).length;
   const hwType = roomHwType(door.room);
 
   const setSnagged = () => {
@@ -1014,7 +1022,7 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
         <div className="small">{doneCount}/6 done</div>
       </div>
       <div className="checks" style={{marginTop:8}}>
-        {INSTALL_CHECKLIST.map(([key,label]) => (
+        {applicableInstallChecklist(door.room).map(([key,label]) => (
           <label key={key} className={`check ${door[key]?"done":""}`}>
             <input type="checkbox" checked={!!door[key]} onChange={()=>toggle(key)} />
             <span>{label}</span>
