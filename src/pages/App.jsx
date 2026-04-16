@@ -28,6 +28,7 @@ const HW_KEYS = [
 // Room -> hardware type mapping
 const CYLINDER_ROOMS = /bedroom|store|storage|laundry|iron|toilet|maid/i;
 const KNOB_ROOMS     = /bathroom|bath|powder/i;
+const NO_STOPPER_ROOMS = /laundry/i;
 
 function roomHwType(room) {
   if (!room) return "cylinder";
@@ -38,16 +39,19 @@ function roomHwType(room) {
 // Get the HW keys that actually apply to a specific door (based on room type)
 function applicableHwKeys(room) {
   const type = roomHwType(room);
-  return [
+  const keys = [
     "del_architraves", "del_hinges", "del_lock",
     type === "knob" ? "del_knob" : "del_cylinder",
     "del_handle",
-    type === "knob" ? "del_cyl_stopper" : "del_bowl_stopper",
   ];
+  if (!NO_STOPPER_ROOMS.test(room || "")) {
+    keys.push(type === "knob" ? "del_cyl_stopper" : "del_bowl_stopper");
+  }
+  return keys;
 }
 
-// Total delivery items per door = 2 (frame, shutter) + 6 applicable HW = 8
-const DELIVERY_TOTAL = 8;
+// Total delivery items per door = 2 (frame, shutter) + applicable HW keys
+function deliveryTotal(room) { return 2 + applicableHwKeys(room).length; }
 
 function deriveStatus(d) {
   if (d.status === "SNAGGED") return "SNAGGED";
@@ -155,7 +159,7 @@ function Dashboard({ doors }) {
       hinges:0, locks:0, cylinders:0, knobs:0,
       handles:0, bowlStoppers:0, cylStoppers:0,
     };
-    let cylinderRooms = 0, knobRooms = 0, doorDelivered = 0;
+    let cylinderRooms = 0, knobRooms = 0, doorDelivered = 0, cylStopperRooms = 0;
     // Room-type installation counters
     let cylInstalled = 0, knobInstalled = 0;
     s.total = doors.length;
@@ -173,12 +177,12 @@ function Dashboard({ doors }) {
       if (d.del_cyl_stopper) delItems.cylStoppers++;
       // Count room types
       const hwt = roomHwType(d.room);
-      if (hwt === "cylinder") { cylinderRooms++; if (d.status === "INSTALLED") cylInstalled++; }
+      if (hwt === "cylinder") { cylinderRooms++; if (!NO_STOPPER_ROOMS.test(d.room || "")) cylStopperRooms++; if (d.status === "INSTALLED") cylInstalled++; }
       else { knobRooms++; if (d.status === "INSTALLED") knobInstalled++; }
       // Door is "delivered" when frame + shutter + architraves all delivered
       if (d.del_frame && d.del_shutter && d.del_architraves) doorDelivered++;
     });
-    return { ...s, delItems, cylinderRooms, knobRooms, doorDelivered, cylInstalled, knobInstalled };
+    return { ...s, delItems, cylinderRooms, knobRooms, cylStopperRooms, doorDelivered, cylInstalled, knobInstalled };
   }, [doors]);
 
   const byFloor = useMemo(() => {
@@ -221,7 +225,7 @@ function Dashboard({ doors }) {
               <div className="small">Cylinders</div><div>{di.cylinders}/{stats.cylinderRooms}</div><div style={{color:"#fca5a5"}}>{stats.cylinderRooms-di.cylinders}</div>
               <div className="small">Knobs</div><div>{di.knobs}/{stats.knobRooms}</div><div style={{color:"#fca5a5"}}>{stats.knobRooms-di.knobs}</div>
               <div className="small">Handle sets</div><div>{di.handles}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.handles}</div>
-              <div className="small">Bowl stoppers</div><div>{di.bowlStoppers}/{stats.cylinderRooms}</div><div style={{color:"#fca5a5"}}>{stats.cylinderRooms-di.bowlStoppers}</div>
+              <div className="small">Bowl stoppers</div><div>{di.bowlStoppers}/{stats.cylStopperRooms}</div><div style={{color:"#fca5a5"}}>{stats.cylStopperRooms-di.bowlStoppers}</div>
               <div className="small">Cyl. stoppers</div><div>{di.cylStoppers}/{stats.knobRooms}</div><div style={{color:"#fca5a5"}}>{stats.knobRooms-di.cylStoppers}</div>
             </div>
           </div>
@@ -564,7 +568,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
       del_architraves: all, del_hinges: all, del_lock: all,
       del_cylinder: cylCount, del_knob: knobCount,
       del_handle: all,
-      del_bowl_stopper: cylCount, del_cyl_stopper: knobCount,
+      del_bowl_stopper: doors.filter(d => roomHwType(d.room) === "cylinder" && !NO_STOPPER_ROOMS.test(d.room || "")).length, del_cyl_stopper: knobCount,
     };
   }, [doors]);
 
@@ -611,7 +615,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
       unitLabel = `${qty} knobs -> knob-type rooms only`;
     } else if (hwType === "del_bowl_stopper") {
       // Bowl stoppers go to cylinder rooms (bedrooms, storage, etc.)
-      eligible = sorted.filter(d => !d.del_bowl_stopper && roomHwType(d.room) === "cylinder");
+      eligible = sorted.filter(d => !d.del_bowl_stopper && roomHwType(d.room) === "cylinder" && !NO_STOPPER_ROOMS.test(d.room || ""));
       doorsToFill = qty;
       unitLabel = `${qty} bowl stoppers -> cylinder rooms (bedrooms/storage/etc.)`;
     } else if (hwType === "del_cyl_stopper") {
@@ -791,8 +795,8 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
                     <td className="small">{d.room || ""}</td>
                     <td>{d.door_type}</td>
                     <td>
-                      <span className={`pill ${totalDone===DELIVERY_TOTAL?"INSTALLED":totalDone>0?"IN_PROGRESS":"PENDING"}`}>
-                        {totalDone}/{DELIVERY_TOTAL}
+                      <span className={`pill ${totalDone===deliveryTotal(d.room)?"INSTALLED":totalDone>0?"IN_PROGRESS":"PENDING"}`}>
+                        {totalDone}/{deliveryTotal(d.room)}
                       </span>
                     </td>
                     <td style={{padding:"4px 6px",textAlign:"center"}}>
