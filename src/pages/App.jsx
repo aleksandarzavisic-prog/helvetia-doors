@@ -92,7 +92,7 @@ export default function App() {
       ]);
       if (dRes.error) throw dRes.error;
       if (tRes.error) throw tRes.error;
-      setDoors(dRes.data || []);
+      setDoors((dRes.data || []).map(d => ({ ...d, status: deriveStatus(d) })));
       setTypes(tRes.data || []);
     } catch (e) { setErr(e.message || String(e)); }
     finally { setLoading(false); }
