@@ -604,10 +604,10 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
     let unitLabel = "";
 
     if (hwType === "del_architraves") {
-      // Architraves: 4.5 pieces per door -> floor to full doors only
+      // Architraves: 5 pieces per door -> floor to full doors only
       eligible = sorted.filter(d => !d.del_architraves);
-      doorsToFill = Math.floor(qty / 4.5);
-      unitLabel = `${qty} architraves -> ${Math.min(doorsToFill, eligible.length)} doors (4.5 per door)`;
+      doorsToFill = Math.floor(qty / 5);
+      unitLabel = `${qty} architraves -> ${Math.min(doorsToFill, eligible.length)} doors (5 per door)`;
     } else if (hwType === "del_hinges") {
       // Hinges: 3 pieces per door
       eligible = sorted.filter(d => !d.del_hinges);
@@ -673,7 +673,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
         <div style={{fontWeight:700,marginBottom:10}}>Bulk hardware distribution</div>
         <div className="small" style={{marginBottom:8,opacity:.7}}>
           Enter quantity received (pieces) -> auto-assigns to doors in ascending floor order.
-          Architraves: 4.5 per door. Hinges: 3 per door. Bowl stoppers -> cylinder rooms. Cyl. stoppers -> knob rooms.
+          Architraves: 5 per door. Hinges: 3 per door. Bowl stoppers -> cylinder rooms. Cyl. stoppers -> knob rooms.
         </div>
         <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",marginBottom:12,alignItems:"center"}}>
           <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div><div className="small" style={{fontWeight:700,opacity:.6}}>Assigned</div><div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
