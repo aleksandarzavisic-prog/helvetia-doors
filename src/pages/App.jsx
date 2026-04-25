@@ -167,7 +167,7 @@ function Dashboard({ doors }) {
       hinges:0, locks:0, cylinders:0, knobs:0,
       handles:0, bowlStoppers:0, cylStoppers:0,
     };
-    let cylinderRooms = 0, knobRooms = 0, doorDelivered = 0, cylStopperRooms = 0;
+    let cylinderRooms = 0, knobRooms = 0, fullDoorDelivered = 0, cylStopperRooms = 0;
     // Room-type installation counters
     let cylInstalled = 0, knobInstalled = 0;
     s.total = doors.length;
@@ -188,9 +188,9 @@ function Dashboard({ doors }) {
       if (hwt === "cylinder") { cylinderRooms++; if (!NO_STOPPER_ROOMS.test(d.room || "")) cylStopperRooms++; if (d.status === "INSTALLED") cylInstalled++; }
       else { knobRooms++; if (d.status === "INSTALLED") knobInstalled++; }
       // Door is "delivered" when frame + shutter + architraves all delivered
-      if (d.del_frame && d.del_shutter && d.del_architraves) doorDelivered++;
+      if (d.del_frame && d.del_shutter) fullDoorDelivered++;
     });
-    return { ...s, delItems, cylinderRooms, knobRooms, cylStopperRooms, doorDelivered, cylInstalled, knobInstalled };
+    return { ...s, delItems, cylinderRooms, knobRooms, cylStopperRooms, fullDoorDelivered, cylInstalled, knobInstalled };
   }, [doors]);
 
   const byFloor = useMemo(() => {
@@ -210,10 +210,11 @@ function Dashboard({ doors }) {
   return (
     <>
       <div className="row" style={{marginBottom:12}}>
-        <div className="stat"><div className="l">Total</div><div className="n">{stats.total}</div></div>
-        <div className="stat"><div className="l">Pending</div><div className="n">{stats.PENDING}</div></div>
-        <div className="stat"><div className="l">Delivered</div><div className="n">{stats.doorDelivered}</div></div>
-        <div className="stat"><div className="l">In progress</div><div className="n">{stats.IN_PROGRESS}</div></div>
+        <div className="stat"><div className="l">Total doors</div><div className="n">{stats.total}</div></div>
+        <div className="stat"><div className="l">Frames delivered</div><div className="n">{stats.delItems.frames}</div></div>
+        <div className="stat"><div className="l">Shutters delivered</div><div className="n">{stats.delItems.shutters}</div></div>
+        <div className="stat"><div className="l">Full doors delivered</div><div className="n" style={{color:"#86efac"}}>{stats.fullDoorDelivered}</div></div>
+        <div className="stat"><div className="l">Pending delivery</div><div className="n" style={{color:"#fca5a5"}}>{stats.total - stats.fullDoorDelivered}</div></div>
         <div className="stat"><div className="l">Installed</div><div className="n">{stats.INSTALLED}</div></div>
         <div className="stat"><div className="l">Snagged</div><div className="n">{stats.SNAGGED}</div></div>
       </div>
@@ -222,7 +223,7 @@ function Dashboard({ doors }) {
         <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
           <div style={{flex:"1 1 280px"}}>
             <div style={{fontWeight:700,marginBottom:10}}>Delivery summary</div>
-            <div className="small" style={{marginBottom:8,opacity:.7}}>Doors delivered (frame+shutter+architraves): <b style={{color:"#86efac"}}>{stats.doorDelivered}</b> / {total}</div>
+            <div className="small" style={{marginBottom:8,opacity:.7}}>Full doors delivered (frame + shutter): <b style={{color:"#86efac"}}>{stats.fullDoorDelivered}</b> / {total} &mdash; Pending: <b style={{color:"#fca5a5"}}>{total - stats.fullDoorDelivered}</b></div>
             <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",alignItems:"center"}}>
               <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div><div className="small" style={{fontWeight:700,opacity:.6}}>Delivered</div><div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
               <div className="small">Frames</div><div>{di.frames}/{total}</div><div style={{color:"#fca5a5"}}>{total-di.frames}</div>
