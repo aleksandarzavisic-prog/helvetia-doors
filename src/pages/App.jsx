@@ -170,6 +170,7 @@ function Dashboard({ doors }) {
     let cylinderRooms = 0, knobRooms = 0, fullDoorDelivered = 0, cylStopperRooms = 0;
     // Room-type installation counters
     let cylInstalled = 0, knobInstalled = 0;
+    let delInstalled = 0, delInProgress = 0, delSnagged = 0, delNotStarted = 0;
     s.total = doors.length;
     doors.forEach(d => {
       s[d.status] = (s[d.status]||0)+1;
@@ -188,22 +189,31 @@ function Dashboard({ doors }) {
       if (hwt === "cylinder") { cylinderRooms++; if (!NO_STOPPER_ROOMS.test(d.room || "")) cylStopperRooms++; if (d.status === "INSTALLED") cylInstalled++; }
       else { knobRooms++; if (d.status === "INSTALLED") knobInstalled++; }
       // Door is "delivered" when frame + shutter + architraves all delivered
-      if (d.del_frame && d.del_shutter) fullDoorDelivered++;
+      if (d.del_frame && d.del_shutter) {
+        fullDoorDelivered++;
+        if (d.status === "INSTALLED") delInstalled++;
+        else if (d.status === "IN_PROGRESS") delInProgress++;
+        else if (d.status === "SNAGGED") delSnagged++;
+        else delNotStarted++;
+      }
     });
-    return { ...s, delItems, cylinderRooms, knobRooms, cylStopperRooms, fullDoorDelivered, cylInstalled, knobInstalled };
+    return { ...s, delItems, cylinderRooms, knobRooms, cylStopperRooms, fullDoorDelivered, cylInstalled, knobInstalled, delInstalled, delInProgress, delSnagged, delNotStarted };
   }, [doors]);
 
   const byFloor = useMemo(() => {
     const m = new Map();
     doors.forEach(d => {
-      if (!m.has(d.floor)) m.set(d.floor, { label: d.floor_label, total:0, installed:0, in_progress:0, delivered_only:0, snagged:0, pending:0 });
+      if (!m.has(d.floor)) m.set(d.floor, { label: d.floor_label, total:0, installed:0, in_progress:0, delivered_only:0, snagged:0, not_delivered:0 });
       const r = m.get(d.floor);
       r.total++;
-      if (d.status === "INSTALLED") r.installed++;
-      else if (d.status === "IN_PROGRESS") r.in_progress++;
-      else if (d.status === "SNAGGED") r.snagged++;
-      else if (d.status === "DELIVERED") r.delivered_only++;
-      else r.pending++;
+      if (d.del_frame && d.del_shutter) {
+        if (d.status === "INSTALLED") r.installed++;
+        else if (d.status === "IN_PROGRESS") r.in_progress++;
+        else if (d.status === "SNAGGED") r.snagged++;
+        else r.delivered_only++;
+      } else {
+        r.not_delivered++;
+      }
     });
     return Array.from(m.entries()).sort((a,b)=>a[0]-b[0]).map(([k,v])=>({floor:k,...v}));
   }, [doors]);
@@ -216,10 +226,10 @@ function Dashboard({ doors }) {
         <div className="stat"><div className="l">Total</div><div className="n">{stats.total}</div></div>
         <div className="stat"><div className="l">Delivered</div><div className="n" style={{color:"#86efac"}}>{stats.fullDoorDelivered}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.fullDoorDelivered/stats.total)*100)}%</div></div>
         <div className="stat"><div className="l">Pending delivery</div><div className="n" style={{color:"#fca5a5"}}>{stats.total - stats.fullDoorDelivered}</div><div className="small" style={{opacity:.5}}>{Math.round(((stats.total - stats.fullDoorDelivered)/stats.total)*100)}%</div></div>
-        <div className="stat"><div className="l">Installed</div><div className="n" style={{color:"#4ade80"}}>{stats.INSTALLED}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.INSTALLED/stats.total)*100)}%</div></div>
-        <div className="stat"><div className="l">In progress</div><div className="n" style={{color:"#fbbf24"}}>{stats.IN_PROGRESS}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.IN_PROGRESS/stats.total)*100)}%</div></div>
-        <div className="stat"><div className="l">Delivered not started</div><div className="n" style={{color:"#60a5fa"}}>{stats.DELIVERED}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.DELIVERED/stats.total)*100)}%</div></div>
-        <div className="stat"><div className="l">Snagged</div><div className="n" style={{color:"#f87171"}}>{stats.SNAGGED}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.SNAGGED/stats.total)*100)}%</div></div>
+        <div className="stat"><div className="l">Installed</div><div className="n" style={{color:"#4ade80"}}>{stats.delInstalled}</div><div className="small" style={{opacity:.5}}>{stats.fullDoorDelivered ? Math.round((stats.delInstalled/stats.fullDoorDelivered)*100) : 0}% of delivered</div></div>
+        <div className="stat"><div className="l">In progress</div><div className="n" style={{color:"#fbbf24"}}>{stats.delInProgress}</div><div className="small" style={{opacity:.5}}>{stats.fullDoorDelivered ? Math.round((stats.delInProgress/stats.fullDoorDelivered)*100) : 0}% of delivered</div></div>
+        <div className="stat"><div className="l">Delivered not started</div><div className="n" style={{color:"#60a5fa"}}>{stats.delNotStarted}</div><div className="small" style={{opacity:.5}}>{stats.fullDoorDelivered ? Math.round((stats.delNotStarted/stats.fullDoorDelivered)*100) : 0}% of delivered</div></div>
+        <div className="stat"><div className="l">Snagged</div><div className="n" style={{color:"#f87171"}}>{stats.delSnagged}</div><div className="small" style={{opacity:.5}}>{stats.fullDoorDelivered ? Math.round((stats.delSnagged/stats.fullDoorDelivered)*100) : 0}% of delivered</div></div>
       </div>
 
       <div className="card">
@@ -262,18 +272,18 @@ function Dashboard({ doors }) {
       <div className="card">
         <div style={{fontWeight:700,marginBottom:10}}>Overall progress</div>
         <div style={{display:"flex",height:22,borderRadius:6,overflow:"hidden",background:"rgba(255,255,255,0.06)",marginBottom:4}}>
-          {stats.INSTALLED > 0 && <div style={{width:`${(stats.INSTALLED/total)*100}%`,background:"#4ade80",transition:"width .3s"}} title={`Installed: ${stats.INSTALLED}`}/>}
-          {stats.IN_PROGRESS > 0 && <div style={{width:`${(stats.IN_PROGRESS/total)*100}%`,background:"#fbbf24",transition:"width .3s"}} title={`In progress: ${stats.IN_PROGRESS}`}/>}
-          {stats.DELIVERED > 0 && <div style={{width:`${(stats.DELIVERED/total)*100}%`,background:"#60a5fa",transition:"width .3s"}} title={`Delivered: ${stats.DELIVERED}`}/>}
-          {stats.SNAGGED > 0 && <div style={{width:`${(stats.SNAGGED/total)*100}%`,background:"#f87171",transition:"width .3s"}} title={`Snagged: ${stats.SNAGGED}`}/>}
-          {stats.PENDING > 0 && <div style={{width:`${(stats.PENDING/total)*100}%`,background:"#6b7280",transition:"width .3s"}} title={`Not delivered: ${stats.PENDING}`}/>}
+          {stats.delInstalled > 0 && <div style={{width:`${(stats.delInstalled/total)*100}%`,background:"#4ade80",transition:"width .3s"}} title={`Installed: ${stats.delInstalled}`}/>}
+          {stats.delInProgress > 0 && <div style={{width:`${(stats.delInProgress/total)*100}%`,background:"#fbbf24",transition:"width .3s"}} title={`In progress: ${stats.delInProgress}`}/>}
+          {stats.delNotStarted > 0 && <div style={{width:`${(stats.delNotStarted/total)*100}%`,background:"#60a5fa",transition:"width .3s"}} title={`Not started: ${stats.delNotStarted}`}/>}
+          {stats.delSnagged > 0 && <div style={{width:`${(stats.delSnagged/total)*100}%`,background:"#f87171",transition:"width .3s"}} title={`Snagged: ${stats.delSnagged}`}/>}
+          {(stats.total - stats.fullDoorDelivered) > 0 && <div style={{width:`${((stats.total - stats.fullDoorDelivered)/total)*100}%`,background:"#6b7280",transition:"width .3s"}} title={`Not delivered: ${stats.total - stats.fullDoorDelivered}`}/>}
         </div>
         <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:6}}>
-          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#4ade80",marginRight:4,verticalAlign:"middle"}}/>Installed {stats.INSTALLED} ({Math.round((stats.INSTALLED/total)*100)}%)</div>
-          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#fbbf24",marginRight:4,verticalAlign:"middle"}}/>In progress {stats.IN_PROGRESS} ({Math.round((stats.IN_PROGRESS/total)*100)}%)</div>
-          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#60a5fa",marginRight:4,verticalAlign:"middle"}}/>Delivered {stats.DELIVERED} ({Math.round((stats.DELIVERED/total)*100)}%)</div>
-          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#f87171",marginRight:4,verticalAlign:"middle"}}/>Snagged {stats.SNAGGED} ({Math.round((stats.SNAGGED/total)*100)}%)</div>
-          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#6b7280",marginRight:4,verticalAlign:"middle"}}/>Not delivered {stats.PENDING} ({Math.round((stats.PENDING/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#4ade80",marginRight:4,verticalAlign:"middle"}}/>Installed {stats.delInstalled} ({Math.round((stats.delInstalled/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#fbbf24",marginRight:4,verticalAlign:"middle"}}/>In progress {stats.delInProgress} ({Math.round((stats.delInProgress/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#60a5fa",marginRight:4,verticalAlign:"middle"}}/>Not started {stats.delNotStarted} ({Math.round((stats.delNotStarted/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#f87171",marginRight:4,verticalAlign:"middle"}}/>Snagged {stats.delSnagged} ({Math.round((stats.delSnagged/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#6b7280",marginRight:4,verticalAlign:"middle"}}/>Not delivered {stats.total - stats.fullDoorDelivered} ({Math.round(((stats.total - stats.fullDoorDelivered)/total)*100)}%)</div>
         </div>
         <hr/>
         <div style={{fontWeight:700,marginBottom:10}}>By floor</div>
@@ -288,7 +298,7 @@ function Dashboard({ doors }) {
               {f.in_progress > 0 && <div style={{width:`${(f.in_progress/f.total)*100}%`,background:"#fbbf24"}}/>}
               {f.delivered_only > 0 && <div style={{width:`${(f.delivered_only/f.total)*100}%`,background:"#60a5fa"}}/>}
               {f.snagged > 0 && <div style={{width:`${(f.snagged/f.total)*100}%`,background:"#f87171"}}/>}
-              {f.pending > 0 && <div style={{width:`${(f.pending/f.total)*100}%`,background:"#6b7280"}}/>}
+              {f.not_delivered > 0 && <div style={{width:`${(f.not_delivered/f.total)*100}%`,background:"#6b7280"}}/>}
             </div>
           </div>
         ))}
