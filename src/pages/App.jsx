@@ -196,11 +196,14 @@ function Dashboard({ doors }) {
   const byFloor = useMemo(() => {
     const m = new Map();
     doors.forEach(d => {
-      if (!m.has(d.floor)) m.set(d.floor, { label: d.floor_label, total:0, installed:0, delivered:0 });
+      if (!m.has(d.floor)) m.set(d.floor, { label: d.floor_label, total:0, installed:0, in_progress:0, delivered_only:0, snagged:0, pending:0 });
       const r = m.get(d.floor);
       r.total++;
       if (d.status === "INSTALLED") r.installed++;
-      if (d.del_frame && d.del_shutter && d.del_architraves) r.delivered++;
+      else if (d.status === "IN_PROGRESS") r.in_progress++;
+      else if (d.status === "SNAGGED") r.snagged++;
+      else if (d.status === "DELIVERED") r.delivered_only++;
+      else r.pending++;
     });
     return Array.from(m.entries()).sort((a,b)=>a[0]-b[0]).map(([k,v])=>({floor:k,...v}));
   }, [doors]);
@@ -263,12 +266,14 @@ function Dashboard({ doors }) {
           {stats.IN_PROGRESS > 0 && <div style={{width:`${(stats.IN_PROGRESS/total)*100}%`,background:"#fbbf24",transition:"width .3s"}} title={`In progress: ${stats.IN_PROGRESS}`}/>}
           {stats.DELIVERED > 0 && <div style={{width:`${(stats.DELIVERED/total)*100}%`,background:"#60a5fa",transition:"width .3s"}} title={`Delivered: ${stats.DELIVERED}`}/>}
           {stats.SNAGGED > 0 && <div style={{width:`${(stats.SNAGGED/total)*100}%`,background:"#f87171",transition:"width .3s"}} title={`Snagged: ${stats.SNAGGED}`}/>}
+          {stats.PENDING > 0 && <div style={{width:`${(stats.PENDING/total)*100}%`,background:"#6b7280",transition:"width .3s"}} title={`Not delivered: ${stats.PENDING}`}/>}
         </div>
         <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:6}}>
           <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#4ade80",marginRight:4,verticalAlign:"middle"}}/>Installed {stats.INSTALLED} ({Math.round((stats.INSTALLED/total)*100)}%)</div>
           <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#fbbf24",marginRight:4,verticalAlign:"middle"}}/>In progress {stats.IN_PROGRESS} ({Math.round((stats.IN_PROGRESS/total)*100)}%)</div>
           <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#60a5fa",marginRight:4,verticalAlign:"middle"}}/>Delivered {stats.DELIVERED} ({Math.round((stats.DELIVERED/total)*100)}%)</div>
           <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#f87171",marginRight:4,verticalAlign:"middle"}}/>Snagged {stats.SNAGGED} ({Math.round((stats.SNAGGED/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#6b7280",marginRight:4,verticalAlign:"middle"}}/>Not delivered {stats.PENDING} ({Math.round((stats.PENDING/total)*100)}%)</div>
         </div>
         <hr/>
         <div style={{fontWeight:700,marginBottom:10}}>By floor</div>
@@ -276,9 +281,15 @@ function Dashboard({ doors }) {
           <div key={f.floor} style={{marginBottom:10}}>
             <div className="row" style={{justifyContent:"space-between",marginBottom:4}}>
               <div className="small" style={{fontWeight:700,opacity:1}}>{f.label}</div>
-              <div className="small">{f.installed}/{f.total} installed · {f.delivered}/{f.total} delivered</div>
+              <div className="small">{f.installed}/{f.total} installed</div>
             </div>
-            <div className="bar"><span style={{width:`${(f.installed/f.total)*100}%`}}/></div>
+            <div style={{display:"flex",height:14,borderRadius:4,overflow:"hidden",background:"rgba(255,255,255,0.06)"}}>
+              {f.installed > 0 && <div style={{width:`${(f.installed/f.total)*100}%`,background:"#4ade80"}}/>}
+              {f.in_progress > 0 && <div style={{width:`${(f.in_progress/f.total)*100}%`,background:"#fbbf24"}}/>}
+              {f.delivered_only > 0 && <div style={{width:`${(f.delivered_only/f.total)*100}%`,background:"#60a5fa"}}/>}
+              {f.snagged > 0 && <div style={{width:`${(f.snagged/f.total)*100}%`,background:"#f87171"}}/>}
+              {f.pending > 0 && <div style={{width:`${(f.pending/f.total)*100}%`,background:"#6b7280"}}/>}
+            </div>
           </div>
         ))}
       </div>
