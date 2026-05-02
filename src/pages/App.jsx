@@ -1030,7 +1030,7 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
       <hr/>
       <div className="row" style={{justifyContent:"space-between"}}>
         <div style={{fontWeight:700}}>Delivered hardware</div>
-        <div className="small" style={{color:"#93c5fd"}}>{hwType === "knob" ? "Knob + Cyl. stopper" : "Cylinder + Bowl stopper"}</div>
+        <div className="small" style={{color:"#93c5fd"}}>{hwType === "knob" ? "Knob + Cyl. stopper" : NO_STOPPER_ROOMS.test(door.room || "") ? "Cylinder (no stopper)" : "Cylinder + Bowl stopper"}</div>
       </div>
       <div className="checks" style={{marginTop:8}}>
         {[
@@ -1039,7 +1039,7 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
           ["del_lock","Lock"],
           ...(hwType==="knob" ? [["del_knob","Knob"]] : [["del_cylinder","Cylinder"]]),
           ["del_handle","Handle"],
-          ...(hwType==="knob" ? [["del_cyl_stopper","Cyl. stopper"]] : [["del_bowl_stopper","Bowl stopper"]]),
+          ...(hwType==="knob" ? [["del_cyl_stopper","Cyl. stopper"]] : NO_STOPPER_ROOMS.test(door.room || "") ? [] : [["del_bowl_stopper","Bowl stopper"]]),
         ].map(([key, label]) => (
           <label key={key} className={`check ${door[key]?"done":""}`}>
             <input type="checkbox" checked={!!door[key]} onChange={()=>toggle(key)} />
