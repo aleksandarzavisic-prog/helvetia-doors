@@ -211,10 +211,12 @@ function Dashboard({ doors }) {
     <>
       <div className="row" style={{marginBottom:12}}>
         <div className="stat"><div className="l">Total</div><div className="n">{stats.total}</div></div>
-        <div className="stat"><div className="l">Delivered</div><div className="n" style={{color:"#86efac"}}>{stats.fullDoorDelivered}</div></div>
-        <div className="stat"><div className="l">Pending delivery</div><div className="n" style={{color:"#fca5a5"}}>{stats.total - stats.fullDoorDelivered}</div></div>
-        <div className="stat"><div className="l">Installed</div><div className="n">{stats.INSTALLED}</div></div>
-        <div className="stat"><div className="l">Snagged</div><div className="n">{stats.SNAGGED}</div></div>
+        <div className="stat"><div className="l">Delivered</div><div className="n" style={{color:"#86efac"}}>{stats.fullDoorDelivered}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.fullDoorDelivered/stats.total)*100)}%</div></div>
+        <div className="stat"><div className="l">Pending delivery</div><div className="n" style={{color:"#fca5a5"}}>{stats.total - stats.fullDoorDelivered}</div><div className="small" style={{opacity:.5}}>{Math.round(((stats.total - stats.fullDoorDelivered)/stats.total)*100)}%</div></div>
+        <div className="stat"><div className="l">Installed</div><div className="n" style={{color:"#4ade80"}}>{stats.INSTALLED}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.INSTALLED/stats.total)*100)}%</div></div>
+        <div className="stat"><div className="l">In progress</div><div className="n" style={{color:"#fbbf24"}}>{stats.IN_PROGRESS}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.IN_PROGRESS/stats.total)*100)}%</div></div>
+        <div className="stat"><div className="l">Delivered not started</div><div className="n" style={{color:"#60a5fa"}}>{stats.DELIVERED}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.DELIVERED/stats.total)*100)}%</div></div>
+        <div className="stat"><div className="l">Snagged</div><div className="n" style={{color:"#f87171"}}>{stats.SNAGGED}</div><div className="small" style={{opacity:.5}}>{Math.round((stats.SNAGGED/stats.total)*100)}%</div></div>
       </div>
 
       <div className="card">
@@ -255,9 +257,19 @@ function Dashboard({ doors }) {
       </div>
 
       <div className="card">
-        <div style={{fontWeight:700,marginBottom:10}}>Overall installation</div>
-        <div className="bar"><span style={{width:`${(stats.INSTALLED/total)*100}%`}}/></div>
-        <div className="small" style={{marginTop:6}}>{stats.INSTALLED} of {total} doors installed ({Math.round((stats.INSTALLED/total)*100)}%)</div>
+        <div style={{fontWeight:700,marginBottom:10}}>Overall progress</div>
+        <div style={{display:"flex",height:22,borderRadius:6,overflow:"hidden",background:"rgba(255,255,255,0.06)",marginBottom:4}}>
+          {stats.INSTALLED > 0 && <div style={{width:`${(stats.INSTALLED/total)*100}%`,background:"#4ade80",transition:"width .3s"}} title={`Installed: ${stats.INSTALLED}`}/>}
+          {stats.IN_PROGRESS > 0 && <div style={{width:`${(stats.IN_PROGRESS/total)*100}%`,background:"#fbbf24",transition:"width .3s"}} title={`In progress: ${stats.IN_PROGRESS}`}/>}
+          {stats.DELIVERED > 0 && <div style={{width:`${(stats.DELIVERED/total)*100}%`,background:"#60a5fa",transition:"width .3s"}} title={`Delivered: ${stats.DELIVERED}`}/>}
+          {stats.SNAGGED > 0 && <div style={{width:`${(stats.SNAGGED/total)*100}%`,background:"#f87171",transition:"width .3s"}} title={`Snagged: ${stats.SNAGGED}`}/>}
+        </div>
+        <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:6}}>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#4ade80",marginRight:4,verticalAlign:"middle"}}/>Installed {stats.INSTALLED} ({Math.round((stats.INSTALLED/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#fbbf24",marginRight:4,verticalAlign:"middle"}}/>In progress {stats.IN_PROGRESS} ({Math.round((stats.IN_PROGRESS/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#60a5fa",marginRight:4,verticalAlign:"middle"}}/>Delivered {stats.DELIVERED} ({Math.round((stats.DELIVERED/total)*100)}%)</div>
+          <div className="small"><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"#f87171",marginRight:4,verticalAlign:"middle"}}/>Snagged {stats.SNAGGED} ({Math.round((stats.SNAGGED/total)*100)}%)</div>
+        </div>
         <hr/>
         <div style={{fontWeight:700,marginBottom:10}}>By floor</div>
         {byFloor.map(f => (
