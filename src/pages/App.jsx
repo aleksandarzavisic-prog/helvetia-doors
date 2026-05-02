@@ -873,7 +873,7 @@ function DeliveryDetail({ door, onUpdate }) {
         <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
         <div className="small">Room</div><div>{door.room || "â"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
-        <div className="small">Hardware type</div><div>{hwType === "knob" ? "Knob + Cyl. stopper" : "Cylinder + Bowl stopper"}</div>
+        <div className="small">Hardware type</div><div>{hwType === "knob" ? "Knob + Cyl. stopper" : NO_STOPPER_ROOMS.test(door.room || "") ? "Cylinder (no stopper)" : "Cylinder + Bowl stopper"}</div>
       </div>
       <hr/>
       <div style={{fontWeight:700,marginBottom:8}}>Door items (check on delivery)</div>
@@ -894,7 +894,7 @@ function DeliveryDetail({ door, onUpdate }) {
           ["del_lock","Lock"],
           ...(hwType==="knob" ? [["del_knob","Knob"]] : [["del_cylinder","Cylinder"]]),
           ["del_handle","Handle set"],
-          ...(hwType==="knob" ? [["del_cyl_stopper","Cyl. stopper"]] : [["del_bowl_stopper","Bowl stopper"]]),
+          ...(hwType==="knob" ? [["del_cyl_stopper","Cyl. stopper"]] : NO_STOPPER_ROOMS.test(door.room || "") ? [] : [["del_bowl_stopper","Bowl stopper"]]),
         ].map(([key, label]) => (
           <label key={key} className={`check ${door[key]?"done":""}`} style={{opacity: door[key]?1:0.5}}>
             <input type="checkbox" checked={!!door[key]} onChange={()=>toggle(key)} />
