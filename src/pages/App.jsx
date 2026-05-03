@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "../supabaseClient";
 
-/* ââ constants âââââââââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ constants Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 const INSTALL_CHECKLIST = [
   ["frame_installed",       "Frame"],
@@ -70,9 +70,9 @@ function deriveStatus(d) {
   return "PENDING";
 }
 
-/* ââ Supabase URL for storage âââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ Supabase URL for storage Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
-/* —— FR DOOR constants ———————————————————————————————————— */
+/* ââ FR DOOR constants ââââââââââââââââââââââââââââââââââââ */
 const FR_DEL_ALL = [
   ["del_frame","Frame"],["del_shutter","Shutter"],["del_architraves","Architraves"],
   ["del_hinges","Hinges"],["del_mortise_lock","Mortise Lock"],["del_cylinder","Cylinder"],
@@ -83,16 +83,17 @@ const FR_DEL_ALL = [
   ["del_door_stopper","Door Stopper"],["del_flush_bolt","Flush Bolt"],
   ["del_dead_lock","Dead Lock"],
 ];
+/* Updated frApplicableDel based on Excel table - exact hardware per door type */
 function frApplicableDel(d) {
-  var t = (d.door_type||"").replace(/ - [LR]$/,"");
-  var base = ["del_frame","del_shutter","del_hinges"];
-  if (d.architraves === "Both sides") base.push("del_architraves");
-  if (t==="D1") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_eye_viewer","del_door_stopper"]);
-  if (t==="D4") return base.concat(["del_fhc_lock","del_door_closer"]);
-  if (t==="D5") return base.concat(["del_roller_latch","del_lever_handle","del_door_closer"]);
-  if (t==="D7"||t==="D8") return base.concat(["del_fhc_lock","del_door_closer","del_flush_bolt","del_push_plate","del_pull_handle"]);
-  if (t==="D9") return base.concat(["del_dead_lock","del_lever_handle","del_door_closer"]);
-  if (t==="D10") return base.concat(["del_fhc_lock"]);
+  var t = (d.door_type||"").trim();
+  var base = ["del_frame","del_shutter","del_architraves","del_hinges"];
+  if (t==="D1 - L" || t==="D1 - R") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_concealed_closer","del_eye_viewer","del_door_stopper"]);
+  if (t==="D4 - L" || t==="D4 - R") return base.concat(["del_roller_latch","del_door_closer","del_push_plate","del_pull_handle"]);
+  if (t==="D5 - L") return base.concat(["del_door_closer","del_push_plate","del_pull_handle","del_dead_lock"]);
+  if (t==="D5 - R") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_door_closer","del_push_plate","del_pull_handle","del_dead_lock"]);
+  if (t==="D7" || t==="D8") return base.concat(["del_fhc_lock","del_door_closer","del_flush_bolt"]);
+  if (t==="D9") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_door_closer"]);
+  if (t==="D10 - L") return base.concat(["del_fhc_lock"]);
   return base;
 }
 const FR_INSTALL_CHECKLIST = [
@@ -114,7 +115,7 @@ function frDeriveStatus(d) {
 
 const SUPABASE_URL = "https://kwwgkjrcafbzjxpmyykd.supabase.co";
 
-/* ââ App shell âââââââââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ App shell Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 export default function App() {
   const [tab, setTab] = useState("dashboard");
@@ -170,7 +171,7 @@ export default function App() {
       const anyDel = delKeys.some(k => merged[k]);
       const fp = { ...patch, updated_at: new Date().toISOString() };
       if (anyDel && !merged.delivered_at) fp.delivered_at = new Date().toISOString();
-      await supabase.from("doors").update(fp).eq("id", id);
+      await supabase.from(mode==="fr"?"fr_doors":"doors").update(fp).eq("id", id);
     }
     load();
   };
@@ -182,7 +183,7 @@ export default function App() {
           <div style={{fontSize:18,fontWeight:800}}>Helvetia Doors</div>
           <div className="small">Delivery & installation tracking {"\u00b7"} v4.0.0</div>
         </div>
-        <button className="btn" onClick={load}>{loading ? "Loadingâ¦" : "Refresh"}</button>
+        <button className="btn" onClick={load}>{loading ? "LoadingÃ¢ÂÂ¦" : "Refresh"}</button>
       </div>
 
       
@@ -203,13 +204,13 @@ export default function App() {
       {mode==="regular" && tab === "delivery"  && <DeliveryTab doors={doors} types={types} onUpdate={updateDoor} onBulk={bulkUpdate} onRefresh={load} woodKey={woodDeliveryKey} bumpWoodKey={()=>setWoodDeliveryKey(k=>k+1)} />}
       {mode==="regular" && tab === "install"   && <InstallTab doors={doors} types={types} onUpdate={updateDoor} onRefresh={load} />}
       {mode==="fr" && tab === "dashboard" && <FRDashboard doors={doors} />}
-      {mode==="fr" && tab === "delivery"  && <FRDeliveryTab doors={doors} onUpdate={updateDoor} onRefresh={load} />}
+      {mode==="fr" && tab === "delivery"  && <FRDeliveryTab doors={doors} onUpdate={updateDoor} onBulk={bulkUpdate} onRefresh={load} />}
       {mode==="fr" && tab === "install"   && <FRInstallTab doors={doors} onUpdate={updateDoor} onRefresh={load} />}
     </div>
   );
 }
 
-/* ââ Dashboard âââââââââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ Dashboard Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 function Dashboard({ doors }) {
   const stats = useMemo(() => {
@@ -489,7 +490,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
           <select className="input" value={selFloor}
             onChange={e => { setSelFloor(e.target.value); setSelApt(""); clearAll(); }}
             style={{width:"100%"}}>
-            <option value="">— Select floor —</option>
+            <option value="">â Select floor â</option>
             {floors.map(([k, label]) => <option key={k} value={k}>{label}</option>)}
           </select>
         </div>
@@ -534,7 +535,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
       {selApt !== "" && (
         <div style={{marginBottom:10,background:"rgba(0,0,0,.2)",borderRadius:8,padding:10}}>
           <div className="row" style={{justifyContent:"space-between",marginBottom:8}}>
-            <div className="small" style={{fontWeight:700}}>Apt {selApt} — click doors to select</div>
+            <div className="small" style={{fontWeight:700}}>Apt {selApt} â click doors to select</div>
             <button className="btn" onClick={() => selectAllInApt(selApt)} style={{padding:"4px 10px",fontSize:12}}>
               {aptDoors.filter(d => !doorAlreadyDone(d)).every(d => selected.has(d.id)) && aptDoors.filter(d => !doorAlreadyDone(d)).length > 0
                 ? "Deselect all" : "Select all"}
@@ -607,7 +608,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
   );
 }
 
-/* ââ Delivery Tab ââââââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ Delivery Tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpWoodKey }) {
   const [floor, setFloor] = useState("");
@@ -783,12 +784,12 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
                    style={{width:"100%",minWidth:0}}/>
           </div>
           <button className="btn primary" disabled={distributing || reversing || !hwQty} onClick={distribute}>
-            {distributing ? "Distributingâ¦" : "Distribute"}
+            {distributing ? "DistributingÃ¢ÂÂ¦" : "Distribute"}
           </button>
           {lastDist && (
             <button className="btn" disabled={reversing || distributing} onClick={reverseLastDist}
                     style={{borderColor:"rgba(239,68,68,.5)",color:"#fca5a5"}}>
-              {reversing ? "Reversingâ¦" : "Undo last"}
+              {reversing ? "ReversingÃ¢ÂÂ¦" : "Undo last"}
             </button>
           )}
         </div>
@@ -861,7 +862,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             </tbody>
           </table>
         </div>
-        <div className="small" style={{marginTop:8}}>Page {dPage + 1} of {Math.ceil(filtered.length / DPAGE_SIZE) || 1} — {filtered.length} doors</div>
+        <div className="small" style={{marginTop:8}}>Page {dPage + 1} of {Math.ceil(filtered.length / DPAGE_SIZE) || 1} â {filtered.length} doors</div>
         <div style={{display:"flex",gap:8,marginTop:4,marginBottom:4}}>
           <button onClick={() => setDPage(p => Math.max(0, p-1))} disabled={dPage === 0} style={{padding:"4px 12px",borderRadius:4,border:"1px solid #475569",background:dPage===0?"#1e293b":"#334155",color:"#e2e8f0",cursor:dPage===0?"not-allowed":"pointer"}}>Prev</button>
           <button onClick={() => setDPage(p => Math.min(Math.ceil(filtered.length/DPAGE_SIZE)-1, p+1))} disabled={(dPage+1)*DPAGE_SIZE >= filtered.length} style={{padding:"4px 12px",borderRadius:4,border:"1px solid #475569",background:(dPage+1)*DPAGE_SIZE>=filtered.length?"#1e293b":"#334155",color:"#e2e8f0",cursor:(dPage+1)*DPAGE_SIZE>=filtered.length?"not-allowed":"pointer"}}>Next</button>
@@ -908,7 +909,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             })}
           </tbody>
         </table>
-        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 â narrow filters to see more)</div>}
+        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 Ã¢ÂÂ narrow filters to see more)</div>}
       </div>
     </>
   );
@@ -922,8 +923,8 @@ function DeliveryDetail({ door, onUpdate }) {
     <div style={{padding:"10px 4px"}}>
       <div className="kv">
         <div className="small">QR code</div><div className="small"><code>{door.qr_code}</code></div>
-        <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
-        <div className="small">Room</div><div>{door.room || "â"}</div>
+        <div className="small">Floor / Apt</div><div>{door.floor_label} Â· {door.apt_no}</div>
+        <div className="small">Room</div><div>{door.room || "Ã¢ÂÂ"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
         <div className="small">Hardware type</div><div>{hwType === "knob" ? "Knob + Cyl. stopper" : NO_STOPPER_ROOMS.test(door.room || "") ? "Cylinder (no stopper)" : "Cylinder + Bowl stopper"}</div>
       </div>
@@ -959,7 +960,7 @@ function DeliveryDetail({ door, onUpdate }) {
   );
 }
 
-/* ââ Installation Tab ââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ Installation Tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 function InstallTab({ doors, types, onUpdate, onRefresh }) {
   const [floor, setFloor] = useState("");
@@ -1009,7 +1010,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
             <option value="">All statuses</option>
             {["PENDING","DELIVERED","IN_PROGRESS","INSTALLED","SNAGGED"].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="input" placeholder="Search qr / apt / roomâ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1}}/>
+          <input className="input" placeholder="Search qr / apt / roomÃ¢ÂÂ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1}}/>
           <button className={`tab ${missingOnly?"active":""}`} onClick={()=>setMissingOnly(v=>!v)} style={{padding:"10px 12px"}}>Missing dims</button>
         </div>
         <div className="small" style={{marginTop:8}}>Showing {filtered.length} of {doors.length}</div>
@@ -1042,7 +1043,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
             ))}
           </tbody>
         </table>
-        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 â narrow filters to see more)</div>}
+        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 Ã¢ÂÂ narrow filters to see more)</div>}
       </div>
     </>
   );
@@ -1065,8 +1066,8 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
     <div style={{padding:"10px 4px"}}>
       <div className="kv">
         <div className="small">QR code</div><div className="small"><code>{door.qr_code}</code></div>
-        <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
-        <div className="small">Room</div><div>{door.room || "â"}</div>
+        <div className="small">Floor / Apt</div><div>{door.floor_label} Â· {door.apt_no}</div>
+        <div className="small">Room</div><div>{door.room || "Ã¢ÂÂ"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
         <div className="small">Status</div><div><span className={`pill ${door.status}`}>{door.status.replace("_"," ")}</span></div>
       </div>
@@ -1132,7 +1133,7 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
   );
 }
 
-/* ââ Snag Photos ââââââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ Snag Photos Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 function SnagPhotos({ door, onUpdate, onRefresh }) {
   const fileRef = useRef(null);
@@ -1181,7 +1182,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
         onRefresh();
       }
     } else {
-      setUploadMsg("Upload failed â check console");
+      setUploadMsg("Upload failed Ã¢ÂÂ check console");
     }
 
     setUploading(false);
@@ -1207,7 +1208,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
       <div className="row" style={{justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <div style={{fontWeight:600,fontSize:13}}>Snag photos ({photos.length})</div>
         <label className="btn primary" style={{cursor:"pointer",display:"inline-flex",alignItems:"center",gap:6}}>
-          {uploading ? "Uploadingâ¦" : "Attach photo"}
+          {uploading ? "UploadingÃ¢ÂÂ¦" : "Attach photo"}
           <input
             ref={fileRef}
             type="file"
@@ -1249,7 +1250,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
   );
 }
 
-/* ââ Shared: DimEditor âââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ Shared: DimEditor Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 
 function DimEditor({ door, onUpdate }) {
   const [w, setW] = useState(door.final_width_mm ?? "");
@@ -1288,21 +1289,21 @@ function DimEditor({ door, onUpdate }) {
       <div className="row" style={{alignItems:"flex-end"}}>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Width</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="â"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Ã¢ÂÂ"
                  value={w} onChange={dimChange(setW)} style={{width:"100%",minWidth:0}}/>
         </div>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Height</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="â"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Ã¢ÂÂ"
                  value={h} onChange={dimChange(setH)} style={{width:"100%",minWidth:0}}/>
         </div>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Thickness</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="â"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Ã¢ÂÂ"
                  value={t} onChange={dimChange(setT)} style={{width:"100%",minWidth:0}}/>
         </div>
         <button className={`btn ${dirty?"primary":""}`} disabled={!dirty||saving} onClick={save}>
-          {saving ? "Savingâ¦" : dirty ? "Save" : "Saved"}
+          {saving ? "SavingÃ¢ÂÂ¦" : dirty ? "Save" : "Saved"}
         </button>
       </div>
     </div>
@@ -1310,9 +1311,9 @@ function DimEditor({ door, onUpdate }) {
 }
 
 
-/* —— FR Dashboard ———————————————————————————————————— */
+/* ââ FR Dashboard ââââââââââââââââââââââââââââââââââââ */
 
-/* ── FR Dashboard ────────────────────────── */
+/* ââ FR Dashboard ââââââââââââââââââââââââââ */
 function FRDashboard({ doors }) {
   const total = doors.length;
   const installed = doors.filter(d => d.status === "INSTALLED").length;
@@ -1355,7 +1356,7 @@ function FRDashboard({ doors }) {
   return (
     <div>
       {/* Summary cards */}
-      <div className="summary-row">
+      <div className="summary-row" style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:12}}>
         <div className="card"><div className="label">TOTAL</div><div className="big">{total}</div></div>
         <div className="card"><div className="label">DELIVERED</div><div className="big green">{delivered}</div><div className="small">{total ? Math.round(delivered/total*100) : 0}%</div></div>
         <div className="card"><div className="label">PENDING DELIVERY</div><div className="big red">{pending + partialDel}</div><div className="small">{total ? Math.round((pending+partialDel)/total*100) : 0}%</div></div>
@@ -1446,37 +1447,176 @@ function FRDashboard({ doors }) {
   );
 }
 
-/* ── FR Delivery Tab ────────────────────── */
-function FRDeliveryTab({ doors, onUpdate, onRefresh }) {
-  const [selFloor, setSelFloor] = useState("all");
-  const [selApt, setSelApt] = useState("all");
-  const [openId, setOpenId] = useState(null);
-  const [page, setPage] = useState(0);
-  const PAGE_SIZE = 100;
 
-  const floors = [...new Set(doors.map(d => d.floor))].sort();
-  const filtered1 = selFloor === "all" ? doors : doors.filter(d => d.floor === selFloor);
-  const apts = [...new Set(filtered1.map(d => d.apt_no))].sort();
-  const filtered = selApt === "all" ? filtered1 : filtered1.filter(d => d.apt_no === selApt);
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+/* ââ FR Wood Elements Delivery ââââââââââââ */
+function FRWoodDelivery({ doors, onBulk, onRefresh }) {
+  const [woodType, setWoodType] = useState("frames");
+  const [selFloor, setSelFloor] = useState("");
+  const [marking, setMarking] = useState(false);
 
-  /* delivery summary table (per floor) */
-  const floorSummary = floors.map(f => {
+  const floors = useMemo(() => [...new Set(doors.map(d => d.floor))].sort(), [doors]);
+  const floorDoors = useMemo(() => selFloor ? doors.filter(d => d.floor === selFloor) : [], [doors, selFloor]);
+  const delKey = woodType === "frames" ? "del_frame" : "del_shutter";
+  const delivered = floorDoors.filter(d => woodType === "full" ? (d.del_frame && d.del_shutter) : !!d[delKey]).length;
+  const total = floorDoors.length;
+
+  const markAll = async (val) => {
+    setMarking(true);
+    if (woodType === "full") {
+      const ups = floorDoors.filter(d => val ? (!d.del_frame || !d.del_shutter) : (d.del_frame || d.del_shutter))
+        .map(d => ({ id: d.id, patch: { del_frame: val, del_shutter: val } }));
+      if (ups.length > 0) await onBulk(ups);
+    } else {
+      const ups = floorDoors.filter(d => !!d[delKey] !== val).map(d => ({ id: d.id, patch: { [delKey]: val } }));
+      if (ups.length > 0) await onBulk(ups);
+    }
+    await onRefresh();
+    setMarking(false);
+  };
+
+  return (
+    <div className="card" style={{marginBottom:12}}>
+      <div style={{fontWeight:700,marginBottom:10}}>Wood elements delivery</div>
+      <div className="small" style={{marginBottom:8,opacity:.7}}>
+        Select delivery type, pick a floor, then click doors to mark as received. Count and confirm before distributing.
+      </div>
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        {["frames","shutters","full"].map(t => (
+          <button key={t} className={"btn" + (woodType === t ? " active" : "")}
+            style={woodType === t ? {background:"#2563eb",color:"#fff"} : {}}
+            onClick={() => setWoodType(t)}>
+            {t === "full" ? "Full door set" : t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
+      </div>
+      <div style={{marginBottom:12}}>
+        <label className="small" style={{marginRight:8}}>Floor</label>
+        <select className="sel" value={selFloor} onChange={e => setSelFloor(e.target.value)}>
+          <option value="">{"â Select floor â"}</option>
+          {floors.map(f => <option key={f} value={f}>{f}</option>)}
+        </select>
+      </div>
+      {selFloor && (
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <span className="small">{delivered}/{total} {woodType === "full" ? "full sets" : woodType} delivered on {selFloor}</span>
+            <div style={{display:"flex",gap:8}}>
+              <button className="btn small" disabled={marking} onClick={() => markAll(true)}>{marking ? "..." : "Mark all"}</button>
+              <button className="btn small" disabled={marking} onClick={() => markAll(false)}>{marking ? "..." : "Unmark all"}</button>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:6}}>
+            {floorDoors.map(d => {
+              const done = woodType === "full" ? (d.del_frame && d.del_shutter) : !!d[delKey];
+              return (
+                <button key={d.id} className={"btn small" + (done ? " done" : "")}
+                  style={{background: done ? "#166534" : "#1e293b", border:"1px solid #334", textAlign:"center", padding:"6px 4px"}}
+                  onClick={async () => {
+                    if (woodType === "full") {
+                      await onBulk([{id: d.id, patch: { del_frame: !done, del_shutter: !done }}]);
+                    } else {
+                      await onBulk([{id: d.id, patch: { [delKey]: !done }}]);
+                    }
+                    await onRefresh();
+                  }}>
+                  <div style={{fontSize:12}}>{d.apt_no}</div>
+                  <div style={{fontSize:10,opacity:.7}}>{d.door_type}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+ => s.applicable > 0);
+  }, [doors]);
+
+  const distribute = async () => {
+    const qty = parseInt(hwQty, 10);
+    if (!qty || qty <= 0) return;
+    setDistributing(true); setDistResult(null);
+    const sorted = [...doors].sort((a,b) => (a.floor||"").localeCompare(b.floor||"") || (a.apt_no||"").localeCompare(b.apt_no||""));
+    const eligible = sorted.filter(d => frApplicableDel(d).includes(hwType) && !d[hwType]);
+    const hwLabel = FR_DEL_ALL.find(([k]) => k === hwType)?.[1] || hwType;
+    let toAssign = [];
+    /* Items with per-door quantities */
+    if (hwType === "del_hinges") {
+      let rem = qty;
+      for (const d of eligible) { const per = d.qty_hinges || 4; if (rem >= per) { toAssign.push(d); rem -= per; } else break; }
+    } else if (hwType === "del_door_closer") {
+      let rem = qty;
+      for (const d of eligible) { const per = d.qty_door_closer || 1; if (rem >= per) { toAssign.push(d); rem -= per; } else break; }
+    } else if (hwType === "del_fhc_lock") {
+      let rem = qty;
+      for (const d of eligible) { const per = d.qty_fhc_lock || 1; if (rem >= per) { toAssign.push(d); rem -= per; } else break; }
+    } else if (hwType === "del_flush_bolt") {
+      let rem = qty;
+      for (const d of eligible) { const per = d.qty_flush_bolt || 1; if (rem >= per) { toAssign.push(d); rem -= per; } else break; }
+    } else {
+      toAssign = eligible.slice(0, qty);
+    }
+    const updates = toAssign.map(d => ({ id: d.id, patch: { [hwType]: true } }));
+    if (updates.length > 0) {
+      setLastDist({ hwType, doorIds: toAssign.map(d => d.id), label: hwLabel });
+      await onBulk(updates);
+    }
+    setDistResult(qty + " " + hwLabel + " -> " + updates.length + " doors, " + (eligible.length - updates.length) + " remaining");
+    setHwQty(""); setDistributing(false);
+  };
+
+  const reverseLastDist = async () => {
+    if (!lastDist || !confirm("Reverse last distribution?\\nThis will uncheck \\\"" + lastDist.label + "\\\" on " + lastDist.doorIds.length + " doors.")) return;
+    setReversing(true);
+    await onBulk(lastDist.doorIds.map(id => ({ id, patch: { [lastDist.hwType]: false } })));
+    setDistResult("Reversed: un-assigned " + lastDist.label + " from " + lastDist.doorIds.length + " doors");
+    setLastDist(null); setReversing(false);
+  };
+
+  const floorSummary = useMemo(() => floors.map(f => {
     const fd = doors.filter(d => d.floor === f);
-    const total = fd.length;
-    const fullyDel = fd.filter(d => {
-      const keys = frApplicableDel(d);
-      return keys.every(k => d[k]);
-    }).length;
-    const remaining = total - fullyDel;
-    return { floor: f, total, fullyDel, remaining };
-  });
+    const fullyDel = fd.filter(d => frApplicableDel(d).every(k => d[k])).length;
+    return { floor: f, total: fd.length, fullyDel, remaining: fd.length - fullyDel };
+  }), [doors, floors]);
 
   return (
     <div>
-      {/* Per-floor delivery summary */}
-      <div className="card" style={{marginBottom:18}}>
+      <FRWoodDelivery doors={doors} onBulk={onBulk} onRefresh={onRefresh} />
+
+      <div className="card" style={{marginBottom:12}}>
+        <div style={{fontWeight:700,marginBottom:10}}>Bulk hardware distribution</div>
+        <div className="small" style={{marginBottom:8,opacity:.7}}>
+          Enter quantity received (pieces) {"->"}  auto-assigns to doors in ascending floor order. Hinges: qty per door varies. Door Closer/FHC Lock/Flush Bolt: qty per door varies.
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"auto auto auto",gap:"4px 12px",marginBottom:12,alignItems:"center"}}>
+          <div className="small" style={{fontWeight:700,opacity:.6}}>Item</div>
+          <div className="small" style={{fontWeight:700,opacity:.6}}>Assigned</div>
+          <div className="small" style={{fontWeight:700,opacity:.6}}>Remaining</div>
+          {hwSummary.map(s => (
+            <React.Fragment key={s.key}>
+              <div className="small">{s.label}</div>
+              <div>{s.done}/{s.applicable}</div>
+              <div style={{color: s.remaining > 0 ? "#fca5a5" : "#4ade80"}}>{s.remaining}</div>
+            </React.Fragment>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <label className="small">Item type</label>
+          <select className="sel" value={hwType} onChange={e => setHwType(e.target.value)}>
+            {hwSummary.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+          </select>
+          <label className="small">Quantity (pcs)</label>
+          <input type="number" className="inp" placeholder="e.g. 200" value={hwQty}
+            onChange={e => setHwQty(e.target.value)} style={{width:100}} />
+          <button className="btn" style={{background:"#dc2626"}} disabled={distributing}
+            onClick={distribute}>{distributing ? "..." : "Distribute"}</button>
+          {lastDist && <button className="btn" disabled={reversing} onClick={reverseLastDist}>{reversing ? "..." : "Undo last"}</button>}
+        </div>
+        {distResult && <div className="small" style={{marginTop:8,color:"#4ade80"}}>{distResult}</div>}
+      </div>
+
+      <div className="card" style={{marginBottom:12}}>
         <h3>Delivery summary by floor</h3>
         <table className="tbl" style={{width:"100%"}}>
           <thead><tr><th>Floor</th><th>Fully Delivered</th><th>Total</th><th>Remaining</th></tr></thead>
@@ -1486,39 +1626,28 @@ function FRDeliveryTab({ doors, onUpdate, onRefresh }) {
                 <td><strong>{s.floor}</strong></td>
                 <td className={s.fullyDel === s.total ? "green" : ""}>{s.fullyDel}/{s.total}</td>
                 <td>{s.total}</td>
-                <td className={s.remaining > 0 ? "red" : "green"}>
-                  {s.remaining > 0 ? s.remaining + " remaining" : "All delivered"}
-                </td>
+                <td className={s.remaining > 0 ? "red" : "green"}>{s.remaining > 0 ? s.remaining + " remaining" : "All delivered"}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Per-door delivery items */}
       <div className="card">
         <h3>Per-door delivery items</h3>
         <div style={{display:"flex",gap:12,marginBottom:12,flexWrap:"wrap"}}>
-          <div>
-            <select className="sel" value={selFloor} onChange={e => { setSelFloor(e.target.value); setSelApt("all"); setPage(0); }}>
-              <option value="all">All floors</option>
-              {floors.map(f => <option key={f} value={f}>{f}</option>)}
-            </select>
-          </div>
-          <div>
-            <select className="sel" value={selApt} onChange={e => { setSelApt(e.target.value); setPage(0); }}>
-              <option value="all">All apts</option>
-              {apts.map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-          </div>
+          <select className="sel" value={selFloor} onChange={e => { setSelFloor(e.target.value); setSelApt("all"); setPage(0); }}>
+            <option value="all">All floors</option>
+            {floors.map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+          <select className="sel" value={selApt} onChange={e => { setSelApt(e.target.value); setPage(0); }}>
+            <option value="all">All apts</option>
+            {apts.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
         </div>
-
         <div className="small" style={{marginBottom:8}}>Showing {filtered.length} of {doors.length} doors</div>
-
         <table className="tbl" style={{width:"100%"}}>
-          <thead>
-            <tr><th>Floor</th><th>Apt</th><th>Door Type</th><th>Location</th><th>Delivered</th><th></th></tr>
-          </thead>
+          <thead><tr><th>Floor</th><th>Apt</th><th>Door Type</th><th>Location</th><th>Delivered</th><th></th></tr></thead>
           <tbody>
             {paged.map(d => {
               const appKeys = frApplicableDel(d);
@@ -1531,27 +1660,18 @@ function FRDeliveryTab({ doors, onUpdate, onRefresh }) {
                     <td><strong>{d.apt_no}</strong></td>
                     <td>{d.door_type}</td>
                     <td className="small">{d.door_location}</td>
-                    <td>
-                      <span className={"badge " + (done === appKeys.length ? "green" : done > 0 ? "yellow" : "red")}>
-                        {done}/{appKeys.length}
-                      </span>
-                    </td>
+                    <td><span className={"badge " + (done === appKeys.length ? "green" : done > 0 ? "yellow" : "red")}>{done}/{appKeys.length}</span></td>
                     <td><button className="btn small">{isOpen ? "Close" : "Open"}</button></td>
                   </tr>
-                  {isOpen && (
-                    <tr><td colSpan={6} style={{padding:0}}>
-                      <FRDeliveryDetail door={d} onUpdate={onUpdate} />
-                    </td></tr>
-                  )}
+                  {isOpen && <tr><td colSpan={6} style={{padding:0}}><FRDeliveryDetail door={d} onUpdate={onUpdate} /></td></tr>}
                 </React.Fragment>
               );
             })}
           </tbody>
         </table>
-
         {totalPages > 1 && (
           <div style={{marginTop:12,display:"flex",gap:8,alignItems:"center"}}>
-            <span className="small">Page {page + 1} of {totalPages} — {filtered.length} doors</span>
+            <span className="small">Page {page + 1} of {totalPages} {" â "} {filtered.length} doors</span>
             <button className="btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
             <button className="btn" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</button>
           </div>
@@ -1561,7 +1681,8 @@ function FRDeliveryTab({ doors, onUpdate, onRefresh }) {
   );
 }
 
-/* ── FR Delivery Detail (inline) ───────── */
+
+/* ââ FR Delivery Detail (inline) âââââââââ */
 function FRDeliveryDetail({ door, onUpdate }) {
   const appKeys = frApplicableDel(door);
   const appItems = FR_DEL_ALL.filter(([k]) => appKeys.includes(k));
@@ -1569,7 +1690,7 @@ function FRDeliveryDetail({ door, onUpdate }) {
   return (
     <div className="card" style={{margin:8,background:"#1a2332"}}>
       <div className="small" style={{marginBottom:8}}>
-        SR#{door.sr_no} · {door.door_type} · {door.floor} / {door.apt_no} / {door.door_location}
+        SR#{door.sr_no} Â· {door.door_type} Â· {door.floor} / {door.apt_no} / {door.door_location}
       </div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <strong>Delivered hardware</strong>
@@ -1581,7 +1702,7 @@ function FRDeliveryDetail({ door, onUpdate }) {
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
               <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
-              <span>{label} {checked ? "✓" : ""}</span>
+              <span>{label} {checked ? "â" : ""}</span>
             </label>
           );
         })}
@@ -1589,9 +1710,9 @@ function FRDeliveryDetail({ door, onUpdate }) {
       {/* Show quantity and color info */}
       {(door.qty_hinges > 0 || door.qty_fhc_lock > 0 || door.qty_door_closer > 0 || door.qty_flush_bolt > 0) && (
         <div className="small" style={{marginTop:8,color:"#aaa"}}>
-          {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x · </span>}
-          {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x · </span>}
-          {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x · </span>}
+          {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x Â· </span>}
+          {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x Â· </span>}
+          {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x Â· </span>}
           {door.qty_flush_bolt > 0 && <span>Flush Bolt: {door.qty_flush_bolt}x</span>}
         </div>
       )}
@@ -1599,16 +1720,16 @@ function FRDeliveryDetail({ door, onUpdate }) {
         <div className="small" style={{marginTop:4,color:"#aaa"}}>
           Colors:
           {door.hw_lock_color && <span> Lock: {door.hw_lock_color}</span>}
-          {door.hw_cylinder_color && <span> · Cyl: {door.hw_cylinder_color}</span>}
-          {door.hw_handle_color && <span> · Handle: {door.hw_handle_color}</span>}
-          {door.hw_stopper_color && <span> · Stopper: {door.hw_stopper_color}</span>}
+          {door.hw_cylinder_color && <span> Â· Cyl: {door.hw_cylinder_color}</span>}
+          {door.hw_handle_color && <span> Â· Handle: {door.hw_handle_color}</span>}
+          {door.hw_stopper_color && <span> Â· Stopper: {door.hw_stopper_color}</span>}
         </div>
       )}
     </div>
   );
 }
 
-/* ── FR Installation Tab ────────────────── */
+/* ââ FR Installation Tab ââââââââââââââââââ */
 function FRInstallTab({ doors, onUpdate, onRefresh }) {
   const [selFloor, setSelFloor] = useState("all");
   const [selApt, setSelApt] = useState("all");
@@ -1658,7 +1779,7 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
           <option value="IN_PROGRESS">In Progress</option>
           <option value="INSTALLED">Installed</option>
         </select>
-        <input className="sel" placeholder="Search sr / apt / room…" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} style={{minWidth:180}} />
+        <input className="sel" placeholder="Search sr / apt / roomâ¦" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} style={{minWidth:180}} />
       </div>
 
       <div className="small" style={{marginBottom:8}}>Showing {filtered.length} of {doors.length}</div>
@@ -1693,7 +1814,7 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
 
       {totalPages > 1 && (
         <div style={{marginTop:12,display:"flex",gap:8,alignItems:"center"}}>
-          <span className="small">Page {page + 1} of {totalPages} — {filtered.length} doors</span>
+          <span className="small">Page {page + 1} of {totalPages} â {filtered.length} doors</span>
           <button className="btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
           <button className="btn" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</button>
         </div>
@@ -1702,7 +1823,7 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
   );
 }
 
-/* ── FR Installation Detail (inline) ───── */
+/* ââ FR Installation Detail (inline) âââââ */
 function FRInstallDetail({ door, onUpdate, onRefresh }) {
   const [notes, setNotes] = useState(door.notes || "");
   const [saving, setSaving] = useState(false);
@@ -1725,7 +1846,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
       <table className="tbl" style={{width:"auto",marginBottom:16}}>
         <tbody>
           <tr><td className="small">SR#</td><td><strong>{door.sr_no}</strong></td></tr>
-          <tr><td className="small">Floor / Apt</td><td>{door.floor} · {door.apt_no}</td></tr>
+          <tr><td className="small">Floor / Apt</td><td>{door.floor} Â· {door.apt_no}</td></tr>
           <tr><td className="small">Door Type</td><td>{door.door_type}</td></tr>
           <tr><td className="small">Location</td><td>{door.door_location}</td></tr>
           <tr><td className="small">Status</td><td><span className="badge" style={{background:statusColors[door.status] || "#777"}}>{door.status}</span></td></tr>
@@ -1736,7 +1857,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
       <div style={{marginBottom:16}}>
         <strong>Dimensions (mm)</strong>
         <div className="small" style={{marginTop:4}}>
-          Width: {door.width} · Height: {door.height} · Thickness: {door.thickness} · Opening: {door.opening_direction} · Architraves: {door.architraves}
+          Width: {door.width} Â· Height: {door.height} Â· Thickness: {door.thickness} Â· Opening: {door.opening_direction} Â· Architraves: {door.architraves}
         </div>
       </div>
 
@@ -1745,9 +1866,9 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
         <div style={{marginBottom:16}}>
           <strong>Hardware quantities</strong>
           <div className="small" style={{marginTop:4}}>
-            {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x · </span>}
-            {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x · </span>}
-            {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x · </span>}
+            {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x Â· </span>}
+            {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x Â· </span>}
+            {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x Â· </span>}
             {door.qty_flush_bolt > 0 && <span>Flush Bolt: {door.qty_flush_bolt}x</span>}
           </div>
         </div>
@@ -1756,9 +1877,9 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
         <div style={{marginBottom:16}}>
           <strong>Hardware colors</strong>
           <div className="small" style={{marginTop:4}}>
-            {door.hw_lock_color && <span>Lock: {door.hw_lock_color} · </span>}
-            {door.hw_cylinder_color && <span>Cylinder: {door.hw_cylinder_color} · </span>}
-            {door.hw_handle_color && <span>Handle: {door.hw_handle_color} · </span>}
+            {door.hw_lock_color && <span>Lock: {door.hw_lock_color} Â· </span>}
+            {door.hw_cylinder_color && <span>Cylinder: {door.hw_cylinder_color} Â· </span>}
+            {door.hw_handle_color && <span>Handle: {door.hw_handle_color} Â· </span>}
             {door.hw_stopper_color && <span>Stopper: {door.hw_stopper_color}</span>}
           </div>
         </div>
@@ -1775,7 +1896,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
               <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
-              <span>{label} {checked ? "✓" : ""}</span>
+              <span>{label} {checked ? "â" : ""}</span>
             </label>
           );
         })}
@@ -1792,7 +1913,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
               <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
-              <span>{label} {checked ? "✓" : ""}</span>
+              <span>{label} {checked ? "â" : ""}</span>
             </label>
           );
         })}
