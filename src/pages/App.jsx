@@ -71,12 +71,54 @@ function deriveStatus(d) {
 }
 
 /* ââ Supabase URL for storage âââââââââââââââââââââââââââââââ */
+
+/* —— FR DOOR constants ———————————————————————————————————— */
+const FR_DEL_ALL = [
+  ["del_frame","Frame"],["del_shutter","Shutter"],["del_architraves","Architraves"],
+  ["del_hinges","Hinges"],["del_mortise_lock","Mortise Lock"],["del_cylinder","Cylinder"],
+  ["del_roller_latch","Roller Latch"],["del_lever_handle","Lever Handle"],
+  ["del_fhc_lock","FHC Lock"],["del_concealed_closer","Concealed Closer"],
+  ["del_door_closer","Door Closer"],["del_push_plate","Push Plate"],
+  ["del_pull_handle","Pull Handle"],["del_eye_viewer","Eye Viewer"],
+  ["del_door_stopper","Door Stopper"],["del_flush_bolt","Flush Bolt"],
+  ["del_dead_lock","Dead Lock"],
+];
+function frApplicableDel(d) {
+  var t = (d.door_type||"").replace(/ - [LR]$/,"");
+  var base = ["del_frame","del_shutter","del_hinges"];
+  if (d.architraves === "Both sides") base.push("del_architraves");
+  if (t==="D1") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_eye_viewer","del_door_stopper"]);
+  if (t==="D4") return base.concat(["del_fhc_lock","del_door_closer"]);
+  if (t==="D5") return base.concat(["del_roller_latch","del_lever_handle","del_door_closer"]);
+  if (t==="D7"||t==="D8") return base.concat(["del_fhc_lock","del_door_closer","del_flush_bolt","del_push_plate","del_pull_handle"]);
+  if (t==="D9") return base.concat(["del_dead_lock","del_lever_handle","del_door_closer"]);
+  if (t==="D10") return base.concat(["del_fhc_lock"]);
+  return base;
+}
+const FR_INSTALL_CHECKLIST = [
+  ["frame_installed","Frame"],["shutter_installed","Shutter"],
+  ["architraves_installed","Architraves"],["hinges_installed","Hinges"],
+  ["lock_handle_installed","Lock & Handle"],["hardware_installed","Hardware"],
+];
+function frDeriveStatus(d) {
+  var checks = FR_INSTALL_CHECKLIST;
+  var done = checks.filter(([k])=>d[k]).length;
+  if (done===checks.length) return "INSTALLED";
+  if (done>0) return "IN_PROGRESS";
+  var delKeys = frApplicableDel(d);
+  var delDone = delKeys.filter(k=>d[k]).length;
+  if (delDone===delKeys.length) return "DELIVERED";
+  if (delDone>0) return "PARTIAL_DEL";
+  return "PENDING";
+}
+
 const SUPABASE_URL = "https://kwwgkjrcafbzjxpmyykd.supabase.co";
 
 /* ââ App shell âââââââââââââââââââââââââââââââââââââââââââââââ */
 
 export default function App() {
   const [tab, setTab] = useState("dashboard");
+  const [mode, setMode] = useState("regular");
   const [doors, setDoors] = useState([]);
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -84,6 +126,7 @@ export default function App() {
   const [woodDeliveryKey, setWoodDeliveryKey] = useState(0);
 
   const load = useCallback(async () => {
+    if (mode === "fr") { setLoading(true); setErr(null); try { const r = await supabase.from("fr_doors").select("*").order("sr_no").limit(2500); if (r.error) throw r.error; setDoors((r.data||[]).map(d=>({...d, status: frDeriveStatus(d)}))); setTypes([]); } catch(e){ setErr(e.message||String(e)); } finally { setLoading(false); } return; }
     setLoading(true); setErr(null);
     try {
       const [dRes, tRes] = await Promise.all([
@@ -96,22 +139,22 @@ export default function App() {
       setTypes(tRes.data || []);
     } catch (e) { setErr(e.message || String(e)); }
     finally { setLoading(false); }
-  }, []);
+  }, [mode]);
 
   useEffect(() => { load(); }, [load]);
 
   const updateDoor = async (id, patch) => {
     setDoors(prev => prev.map(d => d.id === id ? { ...d, ...patch } : d));
     const merged = { ...doors.find(d => d.id === id), ...patch };
-    const newStatus = deriveStatus(merged);
+    const newStatus = mode==="fr" ? frDeriveStatus(merged) : deriveStatus(merged);
     const fullPatch = { ...patch, status: newStatus, updated_at: new Date().toISOString() };
-    if (newStatus === "INSTALLED" && !merged.installed_at) fullPatch.installed_at = new Date().toISOString();
-    if (newStatus !== "INSTALLED") fullPatch.installed_at = null;
-    const delKeys = [...DEL_ITEMS.map(([k])=>k), ...HW_KEYS];
+    if (mode!=="fr" && newStatus === "INSTALLED" && !merged.installed_at) fullPatch.installed_at = new Date().toISOString();
+    if (mode!=="fr" && newStatus !== "INSTALLED") fullPatch.installed_at = null;
+    const delKeys = mode==="fr" ? frApplicableDel(merged) : [...DEL_ITEMS.map(([k])=>k), ...HW_KEYS];
     const anyDel = delKeys.some(k => merged[k]);
-    if (anyDel && !merged.delivered_at) fullPatch.delivered_at = new Date().toISOString();
-    if (!anyDel && merged.delivered_at && !patch.delivered_at) fullPatch.delivered_at = null;
-    const { error } = await supabase.from("doors").update(fullPatch).eq("id", id);
+    if (mode!=="fr" && anyDel && !merged.delivered_at) fullPatch.delivered_at = new Date().toISOString();
+    if (mode!=="fr" && !anyDel && merged.delivered_at && !patch.delivered_at) fullPatch.delivered_at = null;
+    const { error } = await supabase.from(mode==="fr"?"fr_doors":"doors").update(fullPatch).eq("id", id);
     if (error) { alert(error.message); load(); return; }
     setDoors(prev => prev.map(d => d.id === id? { ...d, ...fullPatch } : d));
   };
@@ -137,9 +180,15 @@ export default function App() {
       <div className="row" style={{justifyContent:"space-between"}}>
         <div>
           <div style={{fontSize:18,fontWeight:800}}>Helvetia Doors</div>
-          <div className="small">Delivery & installation tracking {"\u00b7"} v3.3.0</div>
+          <div className="small">Delivery & installation tracking {"\u00b7"} v4.0.0</div>
         </div>
         <button className="btn" onClick={load}>{loading ? "Loadingâ¦" : "Refresh"}</button>
+      </div>
+
+      
+      <div style={{display:"flex",alignItems:"center",gap:8,margin:"10px 0"}}>
+        <button className={"btn"+(mode==="regular"?" active":"")} style={{fontSize:13,padding:"4px 12px",background:mode==="regular"?"#1a73e8":"#e8e8e8",color:mode==="regular"?"#fff":"#333",border:"none",borderRadius:6}} onClick={()=>{setMode("regular");setTab("dashboard")}}>Regular</button>
+        <button className={"btn"+(mode==="fr"?" active":"")} style={{fontSize:13,padding:"4px 12px",background:mode==="fr"?"#d32f2f":"#e8e8e8",color:mode==="fr"?"#fff":"#333",border:"none",borderRadius:6}} onClick={()=>{setMode("fr");setTab("dashboard")}}>Fire Rated</button>
       </div>
 
       {err && <div className="card" style={{marginTop:12}}><div style={{color:"#fecaca",fontWeight:700}}>Error</div><div className="small">{err}</div></div>}
@@ -150,9 +199,12 @@ export default function App() {
         <button className={`tab ${tab==="install"?"active":""}`}   onClick={()=>setTab("install")}>Installation</button>
       </div>
 
-      {tab === "dashboard" && <Dashboard doors={doors} />}
-      {tab === "delivery"  && <DeliveryTab doors={doors} types={types} onUpdate={updateDoor} onBulk={bulkUpdate} onRefresh={load} woodKey={woodDeliveryKey} bumpWoodKey={()=>setWoodDeliveryKey(k=>k+1)} />}
-      {tab === "install"   && <InstallTab doors={doors} types={types} onUpdate={updateDoor} onRefresh={load} />}
+      {mode==="regular" && tab === "dashboard" && <Dashboard doors={doors} />}
+      {mode==="regular" && tab === "delivery"  && <DeliveryTab doors={doors} types={types} onUpdate={updateDoor} onBulk={bulkUpdate} onRefresh={load} woodKey={woodDeliveryKey} bumpWoodKey={()=>setWoodDeliveryKey(k=>k+1)} />}
+      {mode==="regular" && tab === "install"   && <InstallTab doors={doors} types={types} onUpdate={updateDoor} onRefresh={load} />}
+      {mode==="fr" && tab === "dashboard" && <FRDashboard doors={doors} />}
+      {mode==="fr" && tab === "delivery"  && <FRDeliveryTab doors={doors} onUpdate={updateDoor} onRefresh={load} />}
+      {mode==="fr" && tab === "install"   && <FRInstallTab doors={doors} onUpdate={updateDoor} onRefresh={load} />}
     </div>
   );
 }
@@ -1255,4 +1307,162 @@ function DimEditor({ door, onUpdate }) {
       </div>
     </div>
   );
+}
+
+
+/* —— FR Dashboard ———————————————————————————————————— */
+function FRDashboard({ doors }) {
+  const floors = [...new Set(doors.map(d=>d.floor))];
+  const stats = useMemo(()=>{
+    var total=doors.length, pending=0, partDel=0, delivered=0, inProg=0, installed=0;
+    doors.forEach(d=>{
+      if(d.status==="PENDING") pending++;
+      else if(d.status==="PARTIAL_DEL") partDel++;
+      else if(d.status==="DELIVERED") delivered++;
+      else if(d.status==="IN_PROGRESS") inProg++;
+      else if(d.status==="INSTALLED") installed++;
+    });
+    return {total,pending,partDel,delivered,inProg,installed};
+  },[doors]);
+  return (<div>
+    <div className="card" style={{marginTop:12}}>
+      <div style={{fontWeight:700,marginBottom:8}}>FR Doors Summary</div>
+      <div className="small">Total: {stats.total} | Pending: {stats.pending} | Partial Delivery: {stats.partDel} | Delivered: {stats.delivered} | In Progress: {stats.inProg} | Installed: {stats.installed}</div>
+      <div style={{marginTop:10,height:8,borderRadius:4,background:"#eee",overflow:"hidden"}}>
+        <div style={{height:"100%",width:((stats.installed/stats.total)*100)+"%",background:"#4caf50"}}></div>
+      </div>
+      <div className="small" style={{marginTop:4}}>{Math.round((stats.installed/stats.total)*100)}% complete</div>
+    </div>
+    <div className="card" style={{marginTop:12}}>
+      <div style={{fontWeight:700,marginBottom:8}}>By Floor</div>
+      {floors.map(f=>{
+        var fd=doors.filter(d=>d.floor===f);
+        var inst=fd.filter(d=>d.status==="INSTALLED").length;
+        return <div key={f} className="small" style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:"1px solid #f0f0f0"}}>
+          <span>{f} ({fd.length} doors)</span><span>{inst}/{fd.length} installed</span>
+        </div>;
+      })}
+    </div>
+  </div>);
+}
+
+/* —— FR Delivery Tab ———————————————————————————————— */
+function FRDeliveryTab({ doors, onUpdate, onRefresh }) {
+  const [selFloor, setSelFloor] = useState("");
+  const [selApt, setSelApt] = useState("");
+  const [selDoor, setSelDoor] = useState(null);
+  const floors = [...new Set(doors.map(d=>d.floor))];
+  const apts = useMemo(()=> selFloor ? [...new Set(doors.filter(d=>d.floor===selFloor).map(d=>d.apt_no))] : [],[doors,selFloor]);
+  const aptDoors = useMemo(()=> (selFloor&&selApt) ? doors.filter(d=>d.floor===selFloor&&d.apt_no===selApt) : [],[doors,selFloor,selApt]);
+
+  if (selDoor) {
+    var delKeys = frApplicableDel(selDoor);
+    var items = FR_DEL_ALL.filter(([k])=>delKeys.includes(k));
+    var done = items.filter(([k])=>selDoor[k]).length;
+    return (<div>
+      <button className="btn" style={{marginTop:8}} onClick={()=>setSelDoor(null)}>&larr; Back</button>
+      <div className="card" style={{marginTop:8}}>
+        <div style={{fontWeight:700}}>SR#{selDoor.sr_no} - {selDoor.door_type}</div>
+        <div className="small">{selDoor.floor} / Apt {selDoor.apt_no} / {selDoor.door_location}</div>
+        <div className="small">{selDoor.width}x{selDoor.height}x{selDoor.thickness}mm | {selDoor.opening_direction} | Hinges: {selDoor.qty_hinges}</div>
+        {selDoor.hw_lock_color && <div className="small">Colors: Lock={selDoor.hw_lock_color}, Cyl={selDoor.hw_cylinder_color}, Handle={selDoor.hw_handle_color}, Stopper={selDoor.hw_stopper_color}</div>}
+        <div className="small" style={{marginTop:6,fontWeight:600}}>Delivery ({done}/{items.length})</div>
+        {items.map(([k,label])=><label key={k} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0"}}>
+          <input type="checkbox" checked={!!selDoor[k]} onChange={async()=>{
+            var patch={[k]:!selDoor[k]};
+            await onUpdate(selDoor.id, patch);
+            setSelDoor(prev=>({...prev,...patch,status:frDeriveStatus({...prev,...patch})}));
+          }}/> {label} {(k==="del_hinges"&&selDoor.qty_hinges>4)?" ("+selDoor.qty_hinges+")":""}
+          {(k==="del_fhc_lock"&&selDoor.qty_fhc_lock>1)?" ("+selDoor.qty_fhc_lock+")":""}
+          {(k==="del_door_closer"&&selDoor.qty_door_closer>1)?" ("+selDoor.qty_door_closer+")":""}
+          {(k==="del_flush_bolt"&&selDoor.qty_flush_bolt>1)?" ("+selDoor.qty_flush_bolt+")":""}
+        </label>)}
+      </div>
+    </div>);
+  }
+
+  return (<div>
+    <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+      <select value={selFloor} onChange={e=>{setSelFloor(e.target.value);setSelApt("")}} style={{flex:1,padding:6,borderRadius:6,border:"1px solid #ccc"}}>
+        <option value="">-- Floor --</option>
+        {floors.map(f=><option key={f} value={f}>{f}</option>)}
+      </select>
+      <select value={selApt} onChange={e=>setSelApt(e.target.value)} style={{flex:1,padding:6,borderRadius:6,border:"1px solid #ccc"}}>
+        <option value="">-- Apt --</option>
+        {apts.map(a=><option key={a} value={a}>{a}</option>)}
+      </select>
+    </div>
+    {aptDoors.length>0 && <div style={{marginTop:10}}>
+      {aptDoors.map(d=>{
+        var dk=frApplicableDel(d); var dn=dk.filter(k=>d[k]).length;
+        return <div key={d.id} className="card" style={{marginTop:6,cursor:"pointer"}} onClick={()=>setSelDoor(d)}>
+          <div style={{display:"flex",justifyContent:"space-between"}}>
+            <span style={{fontWeight:600}}>SR#{d.sr_no} {d.door_type}</span>
+            <span className="small">{dn}/{dk.length}</span>
+          </div>
+          <div className="small">{d.door_location} | {d.width}x{d.height}</div>
+        </div>;
+      })}
+    </div>}
+  </div>);
+}
+
+/* —— FR Install Tab ————————————————————————————————— */
+function FRInstallTab({ doors, onUpdate, onRefresh }) {
+  const [selFloor, setSelFloor] = useState("");
+  const [selApt, setSelApt] = useState("");
+  const [selDoor, setSelDoor] = useState(null);
+  const floors = [...new Set(doors.map(d=>d.floor))];
+  const apts = useMemo(()=> selFloor ? [...new Set(doors.filter(d=>d.floor===selFloor).map(d=>d.apt_no))] : [],[doors,selFloor]);
+  const aptDoors = useMemo(()=> (selFloor&&selApt) ? doors.filter(d=>d.floor===selFloor&&d.apt_no===selApt) : [],[doors,selFloor,selApt]);
+
+  if (selDoor) {
+    var done = FR_INSTALL_CHECKLIST.filter(([k])=>selDoor[k]).length;
+    return (<div>
+      <button className="btn" style={{marginTop:8}} onClick={()=>setSelDoor(null)}>&larr; Back</button>
+      <div className="card" style={{marginTop:8}}>
+        <div style={{fontWeight:700}}>SR#{selDoor.sr_no} - {selDoor.door_type}</div>
+        <div className="small">{selDoor.floor} / Apt {selDoor.apt_no} / {selDoor.door_location}</div>
+        <div className="small" style={{marginTop:6,fontWeight:600}}>Installation ({done}/{FR_INSTALL_CHECKLIST.length})</div>
+        {FR_INSTALL_CHECKLIST.map(([k,label])=><label key={k} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0"}}>
+          <input type="checkbox" checked={!!selDoor[k]} onChange={async()=>{
+            var patch={[k]:!selDoor[k]};
+            await onUpdate(selDoor.id, patch);
+            setSelDoor(prev=>({...prev,...patch,status:frDeriveStatus({...prev,...patch})}));
+          }}/> {label}
+        </label>)}
+        <div style={{marginTop:10}}>
+          <textarea placeholder="Notes..." value={selDoor.notes||""} style={{width:"100%",minHeight:50,borderRadius:6,border:"1px solid #ccc",padding:6}} onChange={async(e)=>{
+            var val=e.target.value;
+            setSelDoor(prev=>({...prev,notes:val}));
+          }} onBlur={async(e)=>{await onUpdate(selDoor.id,{notes:e.target.value});}}/>
+        </div>
+      </div>
+    </div>);
+  }
+
+  return (<div>
+    <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
+      <select value={selFloor} onChange={e=>{setSelFloor(e.target.value);setSelApt("")}} style={{flex:1,padding:6,borderRadius:6,border:"1px solid #ccc"}}>
+        <option value="">-- Floor --</option>
+        {floors.map(f=><option key={f} value={f}>{f}</option>)}
+      </select>
+      <select value={selApt} onChange={e=>setSelApt(e.target.value)} style={{flex:1,padding:6,borderRadius:6,border:"1px solid #ccc"}}>
+        <option value="">-- Apt --</option>
+        {apts.map(a=><option key={a} value={a}>{a}</option>)}
+      </select>
+    </div>
+    {aptDoors.length>0 && <div style={{marginTop:10}}>
+      {aptDoors.map(d=>{
+        var dn=FR_INSTALL_CHECKLIST.filter(([k])=>d[k]).length;
+        return <div key={d.id} className="card" style={{marginTop:6,cursor:"pointer"}} onClick={()=>setSelDoor(d)}>
+          <div style={{display:"flex",justifyContent:"space-between"}}>
+            <span style={{fontWeight:600}}>SR#{d.sr_no} {d.door_type}</span>
+            <span className="small">{dn}/{FR_INSTALL_CHECKLIST.length}</span>
+          </div>
+          <div className="small">{d.door_location} | {d.status}</div>
+        </div>;
+      })}
+    </div>}
+  </div>);
 }
