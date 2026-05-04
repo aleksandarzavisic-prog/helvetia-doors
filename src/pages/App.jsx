@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "../supabaseClient";
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ constants ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── constants ─────────────────────────────────────────────── */
 
 const INSTALL_CHECKLIST = [
   ["frame_installed",       "Frame"],
@@ -70,9 +70,9 @@ function deriveStatus(d) {
   return "PENDING";
 }
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Supabase URL for storage ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── Supabase URL for storage ─────────────────────────────── */
 
-/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FR DOOR constants ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */
+/* —— FR DOOR constants ———————————————————————————————————— */
 const FR_DEL_ALL = [
   ["del_frame","Frame"],["del_shutter","Shutter"],["del_architraves","Architraves"],
   ["del_hinges","Hinges"],["del_mortise_lock","Mortise Lock"],["del_cylinder","Cylinder"],
@@ -115,7 +115,7 @@ function frDeriveStatus(d) {
 
 const SUPABASE_URL = "https://kwwgkjrcafbzjxpmyykd.supabase.co";
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ App shell ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── App shell ─────────────────────────────────────────────── */
 
 export default function App() {
   const [tab, setTab] = useState("dashboard");
@@ -183,7 +183,7 @@ export default function App() {
           <div style={{fontSize:18,fontWeight:800}}>Helvetia Doors</div>
           <div className="small">Delivery & installation tracking {"\u00b7"} v4.0.0</div>
         </div>
-        <button className="btn" onClick={load}>{loading ? "LoadingÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦" : "Refresh"}</button>
+        <button className="btn" onClick={load}>{loading ? "Loading…" : "Refresh"}</button>
       </div>
 
       
@@ -210,7 +210,7 @@ export default function App() {
   );
 }
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Dashboard ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── Dashboard ─────────────────────────────────────────────── */
 
 function Dashboard({ doors }) {
   const stats = useMemo(() => {
@@ -490,7 +490,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
           <select className="input" value={selFloor}
             onChange={e => { setSelFloor(e.target.value); setSelApt(""); clearAll(); }}
             style={{width:"100%"}}>
-            <option value="">ÃÂ¢ÃÂÃÂ Select floor ÃÂ¢ÃÂÃÂ</option>
+            <option value="">— Select floor —</option>
             {floors.map(([k, label]) => <option key={k} value={k}>{label}</option>)}
           </select>
         </div>
@@ -535,7 +535,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
       {selApt !== "" && (
         <div style={{marginBottom:10,background:"rgba(0,0,0,.2)",borderRadius:8,padding:10}}>
           <div className="row" style={{justifyContent:"space-between",marginBottom:8}}>
-            <div className="small" style={{fontWeight:700}}>Apt {selApt} ÃÂ¢ÃÂÃÂ click doors to select</div>
+            <div className="small" style={{fontWeight:700}}>Apt {selApt} — click doors to select</div>
             <button className="btn" onClick={() => selectAllInApt(selApt)} style={{padding:"4px 10px",fontSize:12}}>
               {aptDoors.filter(d => !doorAlreadyDone(d)).every(d => selected.has(d.id)) && aptDoors.filter(d => !doorAlreadyDone(d)).length > 0
                 ? "Deselect all" : "Select all"}
@@ -608,7 +608,7 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
   );
 }
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Delivery Tab ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── Delivery Tab ──────────────────────────────────────────── */
 
 function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpWoodKey }) {
   const [floor, setFloor] = useState("");
@@ -784,12 +784,12 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
                    style={{width:"100%",minWidth:0}}/>
           </div>
           <button className="btn primary" disabled={distributing || reversing || !hwQty} onClick={distribute}>
-            {distributing ? "DistributingÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦" : "Distribute"}
+            {distributing ? "Distributing…" : "Distribute"}
           </button>
           {lastDist && (
             <button className="btn" disabled={reversing || distributing} onClick={reverseLastDist}
                     style={{borderColor:"rgba(239,68,68,.5)",color:"#fca5a5"}}>
-              {reversing ? "ReversingÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦" : "Undo last"}
+              {reversing ? "Reversing…" : "Undo last"}
             </button>
           )}
         </div>
@@ -862,7 +862,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             </tbody>
           </table>
         </div>
-        <div className="small" style={{marginTop:8}}>Page {dPage + 1} of {Math.ceil(filtered.length / DPAGE_SIZE) || 1} ÃÂ¢ÃÂÃÂ {filtered.length} doors</div>
+        <div className="small" style={{marginTop:8}}>Page {dPage + 1} of {Math.ceil(filtered.length / DPAGE_SIZE) || 1} — {filtered.length} doors</div>
         <div style={{display:"flex",gap:8,marginTop:4,marginBottom:4}}>
           <button onClick={() => setDPage(p => Math.max(0, p-1))} disabled={dPage === 0} style={{padding:"4px 12px",borderRadius:4,border:"1px solid #475569",background:dPage===0?"#1e293b":"#334155",color:"#e2e8f0",cursor:dPage===0?"not-allowed":"pointer"}}>Prev</button>
           <button onClick={() => setDPage(p => Math.min(Math.ceil(filtered.length/DPAGE_SIZE)-1, p+1))} disabled={(dPage+1)*DPAGE_SIZE >= filtered.length} style={{padding:"4px 12px",borderRadius:4,border:"1px solid #475569",background:(dPage+1)*DPAGE_SIZE>=filtered.length?"#1e293b":"#334155",color:"#e2e8f0",cursor:(dPage+1)*DPAGE_SIZE>=filtered.length?"not-allowed":"pointer"}}>Next</button>
@@ -909,7 +909,7 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
             })}
           </tbody>
         </table>
-        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ narrow filters to see more)</div>}
+        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 — narrow filters to see more)</div>}
       </div>
     </>
   );
@@ -923,8 +923,8 @@ function DeliveryDetail({ door, onUpdate }) {
     <div style={{padding:"10px 4px"}}>
       <div className="kv">
         <div className="small">QR code</div><div className="small"><code>{door.qr_code}</code></div>
-        <div className="small">Floor / Apt</div><div>{door.floor_label} ÃÂÃÂ· {door.apt_no}</div>
-        <div className="small">Room</div><div>{door.room || "ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ"}</div>
+        <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
+        <div className="small">Room</div><div>{door.room || "—"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
         <div className="small">Hardware type</div><div>{hwType === "knob" ? "Knob + Cyl. stopper" : NO_STOPPER_ROOMS.test(door.room || "") ? "Cylinder (no stopper)" : "Cylinder + Bowl stopper"}</div>
       </div>
@@ -960,7 +960,7 @@ function DeliveryDetail({ door, onUpdate }) {
   );
 }
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Installation Tab ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── Installation Tab ──────────────────────────────────────── */
 
 function InstallTab({ doors, types, onUpdate, onRefresh }) {
   const [floor, setFloor] = useState("");
@@ -1010,7 +1010,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
             <option value="">All statuses</option>
             {["PENDING","DELIVERED","IN_PROGRESS","INSTALLED","SNAGGED"].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="input" placeholder="Search qr / apt / roomÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1}}/>
+          <input className="input" placeholder="Search qr / apt / room…" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1}}/>
           <button className={`tab ${missingOnly?"active":""}`} onClick={()=>setMissingOnly(v=>!v)} style={{padding:"10px 12px"}}>Missing dims</button>
         </div>
         <div className="small" style={{marginTop:8}}>Showing {filtered.length} of {doors.length}</div>
@@ -1043,7 +1043,7 @@ function InstallTab({ doors, types, onUpdate, onRefresh }) {
             ))}
           </tbody>
         </table>
-        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ narrow filters to see more)</div>}
+        {filtered.length > 300 && <div className="small" style={{marginTop:10}}>(Showing first 300 — narrow filters to see more)</div>}
       </div>
     </>
   );
@@ -1066,8 +1066,8 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
     <div style={{padding:"10px 4px"}}>
       <div className="kv">
         <div className="small">QR code</div><div className="small"><code>{door.qr_code}</code></div>
-        <div className="small">Floor / Apt</div><div>{door.floor_label} ÃÂÃÂ· {door.apt_no}</div>
-        <div className="small">Room</div><div>{door.room || "ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ"}</div>
+        <div className="small">Floor / Apt</div><div>{door.floor_label} · {door.apt_no}</div>
+        <div className="small">Room</div><div>{door.room || "—"}</div>
         <div className="small">Type</div><div>{door.door_type}</div>
         <div className="small">Status</div><div><span className={`pill ${door.status}`}>{door.status.replace("_"," ")}</span></div>
       </div>
@@ -1133,7 +1133,7 @@ function InstallDetail({ door, onUpdate, onRefresh }) {
   );
 }
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Snag Photos ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── Snag Photos ──────────────────────────────────────────── */
 
 function SnagPhotos({ door, onUpdate, onRefresh }) {
   const fileRef = useRef(null);
@@ -1182,7 +1182,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
         onRefresh();
       }
     } else {
-      setUploadMsg("Upload failed ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ check console");
+      setUploadMsg("Upload failed — check console");
     }
 
     setUploading(false);
@@ -1208,7 +1208,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
       <div className="row" style={{justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <div style={{fontWeight:600,fontSize:13}}>Snag photos ({photos.length})</div>
         <label className="btn primary" style={{cursor:"pointer",display:"inline-flex",alignItems:"center",gap:6}}>
-          {uploading ? "UploadingÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦" : "Attach photo"}
+          {uploading ? "Uploading…" : "Attach photo"}
           <input
             ref={fileRef}
             type="file"
@@ -1250,7 +1250,7 @@ function SnagPhotos({ door, onUpdate, onRefresh }) {
   );
 }
 
-/* ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Shared: DimEditor ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ */
+/* ── Shared: DimEditor ─────────────────────────────────────── */
 
 function DimEditor({ door, onUpdate }) {
   const [w, setW] = useState(door.final_width_mm ?? "");
@@ -1289,21 +1289,21 @@ function DimEditor({ door, onUpdate }) {
       <div className="row" style={{alignItems:"flex-end"}}>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Width</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="—"
                  value={w} onChange={dimChange(setW)} style={{width:"100%",minWidth:0}}/>
         </div>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Height</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="—"
                  value={h} onChange={dimChange(setH)} style={{width:"100%",minWidth:0}}/>
         </div>
         <div style={{flex:1,minWidth:90}}>
           <div className="small" style={{marginBottom:4}}>Thickness</div>
-          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ"
+          <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="—"
                  value={t} onChange={dimChange(setT)} style={{width:"100%",minWidth:0}}/>
         </div>
         <button className={`btn ${dirty?"primary":""}`} disabled={!dirty||saving} onClick={save}>
-          {saving ? "SavingÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¦" : dirty ? "Save" : "Saved"}
+          {saving ? "Saving…" : dirty ? "Save" : "Saved"}
         </button>
       </div>
     </div>
@@ -1311,9 +1311,9 @@ function DimEditor({ door, onUpdate }) {
 }
 
 
-/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FR Dashboard ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */
+/* —— FR Dashboard ———————————————————————————————————— */
 
-/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FR Dashboard ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */
+/* ── FR Dashboard ────────────────────────── */
 function FRDashboard({ doors }) {
   const total = doors.length;
   const installed = doors.filter(d => d.status === "INSTALLED").length;
@@ -1450,7 +1450,7 @@ function FRDashboard({ doors }) {
 
 
 
-/* ââ FR Wood Elements Delivery ââââââââââââ */
+/* ── FR Wood Elements Delivery ──────────── */
 function FRWoodDelivery({ doors, onBulk, onRefresh }) {
   const [woodType, setWoodType] = useState("frames");
   const [selFloor, setSelFloor] = useState("");
@@ -1514,7 +1514,7 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
       await onBulk(updates);
     }
     await onRefresh();
-    setDistResult(qty + " " + label + " â " + updates.length + " doors assigned, " + (eligible.length - updates.length) + " remaining");
+    setDistResult(qty + " " + label + " → " + updates.length + " doors assigned, " + (eligible.length - updates.length) + " remaining");
     setWoodQty(""); setDistributing(false);
   };
 
@@ -1534,7 +1534,7 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
     <div className="card" style={{marginBottom:12}}>
       <div style={{fontWeight:700,marginBottom:10}}>Wood elements delivery</div>
       <div className="small" style={{marginBottom:8,opacity:.7}}>
-        Select delivery type, enter quantity received and click Distribute â or pick a floor and click individual doors.
+        Select delivery type, enter quantity received and click Distribute — or pick a floor and click individual doors.
       </div>
       <div style={{display:"flex",gap:8,marginBottom:12}}>
         {["frames","shutters","full"].map(t => (
@@ -1569,7 +1569,7 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
       <div style={{marginBottom:12}}>
         <label className="small" style={{marginRight:8}}>Floor</label>
         <select className="sel" value={selFloor} onChange={e => setSelFloor(e.target.value)}>
-          <option value="">{"â Select floor â"}</option>
+          <option value="">{"— Select floor —"}</option>
           {floors.map(f => <option key={f} value={f}>{f}</option>)}
         </select>
       </div>
@@ -1609,7 +1609,7 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
 }
 
 
-/* Ã¢ÂÂÃ¢ÂÂ FR Delivery Tab (rebuilt) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ── FR Delivery Tab (rebuilt) ─────────── */
 function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
   const [selFloor, setSelFloor] = useState("all");
   const [selApt, setSelApt] = useState("all");
@@ -1783,7 +1783,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
         </table>
         {totalPages > 1 && (
           <div style={{marginTop:12,display:"flex",gap:8,alignItems:"center"}}>
-            <span className="small">Page {page + 1} of {totalPages} {" Ã¢ÂÂ "} {filtered.length} doors</span>
+            <span className="small">Page {page + 1} of {totalPages} {" — "} {filtered.length} doors</span>
             <button className="btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
             <button className="btn" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</button>
           </div>
@@ -1794,7 +1794,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
 }
 
 
-/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FR Delivery Detail (inline) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */
+/* ── FR Delivery Detail (inline) ───────── */
 function FRDeliveryDetail({ door, onUpdate }) {
   const appKeys = frApplicableDel(door);
   const appItems = FR_DEL_ALL.filter(([k]) => appKeys.includes(k));
@@ -1802,7 +1802,7 @@ function FRDeliveryDetail({ door, onUpdate }) {
   return (
     <div className="card" style={{margin:8,background:"#1a2332"}}>
       <div className="small" style={{marginBottom:8}}>
-        SR#{door.sr_no} ÃÂÃÂ· {door.door_type} ÃÂÃÂ· {door.floor} / {door.apt_no} / {door.door_location}
+        SR#{door.sr_no} · {door.door_type} · {door.floor} / {door.apt_no} / {door.door_location}
       </div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <strong>Delivered hardware</strong>
@@ -1814,7 +1814,7 @@ function FRDeliveryDetail({ door, onUpdate }) {
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
               <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
-              <span>{label} {checked ? "ÃÂ¢ÃÂÃÂ" : ""}</span>
+              <span>{label} {checked ? "✓" : ""}</span>
             </label>
           );
         })}
@@ -1822,9 +1822,9 @@ function FRDeliveryDetail({ door, onUpdate }) {
       {/* Show quantity and color info */}
       {(door.qty_hinges > 0 || door.qty_fhc_lock > 0 || door.qty_door_closer > 0 || door.qty_flush_bolt > 0) && (
         <div className="small" style={{marginTop:8,color:"#aaa"}}>
-          {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x ÃÂÃÂ· </span>}
-          {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x ÃÂÃÂ· </span>}
-          {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x ÃÂÃÂ· </span>}
+          {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x · </span>}
+          {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x · </span>}
+          {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x · </span>}
           {door.qty_flush_bolt > 0 && <span>Flush Bolt: {door.qty_flush_bolt}x</span>}
         </div>
       )}
@@ -1832,16 +1832,16 @@ function FRDeliveryDetail({ door, onUpdate }) {
         <div className="small" style={{marginTop:4,color:"#aaa"}}>
           Colors:
           {door.hw_lock_color && <span> Lock: {door.hw_lock_color}</span>}
-          {door.hw_cylinder_color && <span> ÃÂÃÂ· Cyl: {door.hw_cylinder_color}</span>}
-          {door.hw_handle_color && <span> ÃÂÃÂ· Handle: {door.hw_handle_color}</span>}
-          {door.hw_stopper_color && <span> ÃÂÃÂ· Stopper: {door.hw_stopper_color}</span>}
+          {door.hw_cylinder_color && <span> · Cyl: {door.hw_cylinder_color}</span>}
+          {door.hw_handle_color && <span> · Handle: {door.hw_handle_color}</span>}
+          {door.hw_stopper_color && <span> · Stopper: {door.hw_stopper_color}</span>}
         </div>
       )}
     </div>
   );
 }
 
-/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FR Installation Tab ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */
+/* ── FR Installation Tab ────────────────── */
 function FRInstallTab({ doors, onUpdate, onRefresh }) {
   const [selFloor, setSelFloor] = useState("all");
   const [selApt, setSelApt] = useState("all");
@@ -1891,7 +1891,7 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
           <option value="IN_PROGRESS">In Progress</option>
           <option value="INSTALLED">Installed</option>
         </select>
-        <input className="sel" placeholder="Search sr / apt / roomÃÂ¢ÃÂÃÂ¦" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} style={{minWidth:180}} />
+        <input className="sel" placeholder="Search sr / apt / room…" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} style={{minWidth:180}} />
       </div>
 
       <div className="small" style={{marginBottom:8}}>Showing {filtered.length} of {doors.length}</div>
@@ -1926,7 +1926,7 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
 
       {totalPages > 1 && (
         <div style={{marginTop:12,display:"flex",gap:8,alignItems:"center"}}>
-          <span className="small">Page {page + 1} of {totalPages} ÃÂ¢ÃÂÃÂ {filtered.length} doors</span>
+          <span className="small">Page {page + 1} of {totalPages} — {filtered.length} doors</span>
           <button className="btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
           <button className="btn" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</button>
         </div>
@@ -1935,7 +1935,7 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
   );
 }
 
-/* ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FR Installation Detail (inline) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ */
+/* ── FR Installation Detail (inline) ───── */
 function FRInstallDetail({ door, onUpdate, onRefresh }) {
   const [notes, setNotes] = useState(door.notes || "");
   const [saving, setSaving] = useState(false);
@@ -1958,7 +1958,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
       <table className="tbl" style={{width:"auto",marginBottom:16}}>
         <tbody>
           <tr><td className="small">SR#</td><td><strong>{door.sr_no}</strong></td></tr>
-          <tr><td className="small">Floor / Apt</td><td>{door.floor} ÃÂÃÂ· {door.apt_no}</td></tr>
+          <tr><td className="small">Floor / Apt</td><td>{door.floor} · {door.apt_no}</td></tr>
           <tr><td className="small">Door Type</td><td>{door.door_type}</td></tr>
           <tr><td className="small">Location</td><td>{door.door_location}</td></tr>
           <tr><td className="small">Status</td><td><span className="badge" style={{background:statusColors[door.status] || "#777"}}>{door.status}</span></td></tr>
@@ -1969,7 +1969,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
       <div style={{marginBottom:16}}>
         <strong>Dimensions (mm)</strong>
         <div className="small" style={{marginTop:4}}>
-          Width: {door.width} ÃÂÃÂ· Height: {door.height} ÃÂÃÂ· Thickness: {door.thickness} ÃÂÃÂ· Opening: {door.opening_direction} ÃÂÃÂ· Architraves: {door.architraves}
+          Width: {door.width} · Height: {door.height} · Thickness: {door.thickness} · Opening: {door.opening_direction} · Architraves: {door.architraves}
         </div>
       </div>
 
@@ -1978,9 +1978,9 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
         <div style={{marginBottom:16}}>
           <strong>Hardware quantities</strong>
           <div className="small" style={{marginTop:4}}>
-            {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x ÃÂÃÂ· </span>}
-            {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x ÃÂÃÂ· </span>}
-            {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x ÃÂÃÂ· </span>}
+            {door.qty_hinges > 0 && <span>Hinges: {door.qty_hinges}x · </span>}
+            {door.qty_fhc_lock > 0 && <span>FHC Lock: {door.qty_fhc_lock}x · </span>}
+            {door.qty_door_closer > 0 && <span>Door Closer: {door.qty_door_closer}x · </span>}
             {door.qty_flush_bolt > 0 && <span>Flush Bolt: {door.qty_flush_bolt}x</span>}
           </div>
         </div>
@@ -1989,9 +1989,9 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
         <div style={{marginBottom:16}}>
           <strong>Hardware colors</strong>
           <div className="small" style={{marginTop:4}}>
-            {door.hw_lock_color && <span>Lock: {door.hw_lock_color} ÃÂÃÂ· </span>}
-            {door.hw_cylinder_color && <span>Cylinder: {door.hw_cylinder_color} ÃÂÃÂ· </span>}
-            {door.hw_handle_color && <span>Handle: {door.hw_handle_color} ÃÂÃÂ· </span>}
+            {door.hw_lock_color && <span>Lock: {door.hw_lock_color} · </span>}
+            {door.hw_cylinder_color && <span>Cylinder: {door.hw_cylinder_color} · </span>}
+            {door.hw_handle_color && <span>Handle: {door.hw_handle_color} · </span>}
             {door.hw_stopper_color && <span>Stopper: {door.hw_stopper_color}</span>}
           </div>
         </div>
@@ -2008,7 +2008,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
               <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
-              <span>{label} {checked ? "ÃÂ¢ÃÂÃÂ" : ""}</span>
+              <span>{label} {checked ? "✓" : ""}</span>
             </label>
           );
         })}
@@ -2025,7 +2025,7 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
               <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
-              <span>{label} {checked ? "ÃÂ¢ÃÂÃÂ" : ""}</span>
+              <span>{label} {checked ? "✓" : ""}</span>
             </label>
           );
         })}
