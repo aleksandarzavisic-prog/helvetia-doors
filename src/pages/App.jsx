@@ -75,26 +75,48 @@ function deriveStatus(d) {
 /* —— FR DOOR constants ———————————————————————————————————— */
 const FR_DEL_ALL = [
   ["del_frame","Frame"],["del_shutter","Shutter"],["del_architraves","Architraves"],
-  ["del_hinges","Hinges"],["del_mortise_lock","Mortise Lock"],["del_cylinder","Cylinder"],
-  ["del_roller_latch","Roller Latch"],["del_lever_handle","Lever Handle"],
+  ["del_hinges","Hinges"],
+  ["del_mortise_lock:black","Mortise Lock Black"],["del_mortise_lock:silver","Mortise Lock Silver"],
+  ["del_cylinder:black","Cylinder Black"],["del_cylinder:silver","Cylinder Silver"],
+  ["del_roller_latch","Roller Latch"],
+  ["del_lever_handle:black","Lever Handle Black"],["del_lever_handle:silver","Lever Handle Silver"],
   ["del_fhc_lock","FHC Lock"],["del_concealed_closer","Concealed Closer"],
   ["del_door_closer","Door Closer"],["del_push_plate","Push Plate"],
   ["del_pull_handle","Pull Handle"],["del_eye_viewer","Eye Viewer"],
-  ["del_door_stopper","Door Stopper"],["del_flush_bolt","Flush Bolt"],
+  ["del_door_stopper:black","Door Stopper Black"],["del_door_stopper:silver","Door Stopper Silver"],
+  ["del_flush_bolt","Flush Bolt"],
   ["del_dead_lock","Dead Lock"],
 ];
+
+const FR_DEL_COLOR_FIELD = {
+  del_mortise_lock: "hw_lock_color",
+  del_cylinder:     "hw_cylinder_color",
+  del_lever_handle: "hw_handle_color",
+  del_door_stopper: "hw_stopper_color",
+};
+function frDelBase(k){ return (typeof k==="string" && k.indexOf(":")>-1) ? k.split(":")[0] : k; }
+function frDelColor(k){ return (typeof k==="string" && k.indexOf(":")>-1) ? k.split(":")[1] : null; }
 /* Updated frApplicableDel based on Excel table - exact hardware per door type */
 function frApplicableDel(d) {
+  var _expand = function(k) {
+    if (FR_DEL_COLOR_FIELD[k]) {
+      var cv = d[FR_DEL_COLOR_FIELD[k]];
+      if (!cv) return null;
+      return k + ":" + cv;
+    }
+    return k;
+  };
+  var _wrap = function(arr){ return arr.map(_expand).filter(function(x){ return x !== null; }); };
   var t = (d.door_type||"").trim();
   var base = ["del_frame","del_shutter","del_architraves","del_hinges"];
-  if (t==="D1 - L" || t==="D1 - R") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_concealed_closer","del_eye_viewer","del_door_stopper"]);
-  if (t==="D4 - L" || t==="D4 - R") return base.concat(["del_roller_latch","del_door_closer","del_push_plate","del_pull_handle"]);
-  if (t==="D5 - L") return base.concat(["del_door_closer","del_push_plate","del_pull_handle","del_dead_lock"]);
-  if (t==="D5 - R") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_door_closer","del_push_plate","del_pull_handle","del_dead_lock"]);
-  if (t==="D7" || t==="D8") return base.concat(["del_fhc_lock","del_door_closer","del_flush_bolt"]);
-  if (t==="D9") return base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_door_closer"]);
-  if (t==="D10 - L") return base.concat(["del_fhc_lock"]);
-  return base;
+  if (t==="D1 - L" || t==="D1 - R") return _wrap(base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_concealed_closer","del_eye_viewer","del_door_stopper"]));
+  if (t==="D4 - L" || t==="D4 - R") return _wrap(base.concat(["del_roller_latch","del_door_closer","del_push_plate","del_pull_handle"]));
+  if (t==="D5 - L") return _wrap(base.concat(["del_door_closer","del_push_plate","del_pull_handle","del_dead_lock"]));
+  if (t==="D5 - R") return _wrap(base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_door_closer","del_push_plate","del_pull_handle","del_dead_lock"]));
+  if (t==="D7" || t==="D8") return _wrap(base.concat(["del_fhc_lock","del_door_closer","del_flush_bolt"]));
+  if (t==="D9") return _wrap(base.concat(["del_mortise_lock","del_cylinder","del_lever_handle","del_door_closer"]));
+  if (t==="D10 - L") return _wrap(base.concat(["del_fhc_lock"]));
+  return _wrap(base);
 }
 const FR_INSTALL_CHECKLIST = [
   ["frame_installed","Frame"],["shutter_installed","Shutter"],
@@ -1325,7 +1347,7 @@ function FRDashboard({ doors }) {
   /* delivery summary per item */
   const delSummary = FR_DEL_ALL.map(([key, label]) => {
     const applicable = doors.filter(d => frApplicableDel(d).includes(key)).length;
-    const done = doors.filter(d => frApplicableDel(d).includes(key) && d[key]).length;
+    const done = doors.filter(d => frApplicableDel(d).includes(key) && d[frDelBase(key)]).length;
     return { label, done, applicable, remaining: applicable - done };
   });
 
@@ -1650,7 +1672,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
     if (!qty || qty <= 0) return;
     setDistributing(true); setDistResult(null);
     const sorted = [...doors].sort((a,b) => (a.floor||"").localeCompare(b.floor||"") || (a.apt_no||"").localeCompare(b.apt_no||""));
-    const eligible = sorted.filter(d => frApplicableDel(d).includes(hwType) && !d[hwType]);
+    const eligible = sorted.filter(d => frApplicableDel(d).includes(hwType) && !d[frDelBase(hwType)]);
     const hwLabel = FR_DEL_ALL.find(([k]) => k === hwType)?.[1] || hwType;
     let toAssign = [];
     /* Items with per-door quantities */
@@ -1669,7 +1691,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
     } else {
       toAssign = eligible.slice(0, qty);
     }
-    const updates = toAssign.map(d => ({ id: d.id, patch: { [hwType]: true } }));
+    const updates = toAssign.map(d => ({ id: d.id, patch: { [frDelBase(hwType)]: true } }));
     if (updates.length > 0) {
       setLastDist({ hwType, doorIds: toAssign.map(d => d.id), label: hwLabel });
       await onBulk(updates);
@@ -1810,10 +1832,10 @@ function FRDeliveryDetail({ door, onUpdate }) {
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
         {appItems.map(([key, label]) => {
-          const checked = !!door[key];
+          const checked = !!door[frDelBase(key)];
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
-              <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
+              <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [frDelBase(key)]: !checked })} />
               <span>{label} {checked ? "✓" : ""}</span>
             </label>
           );
@@ -2004,10 +2026,10 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16}}>
         {appItems.map(([key, label]) => {
-          const checked = !!door[key];
+          const checked = !!door[frDelBase(key)];
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
-              <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
+              <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [frDelBase(key)]: !checked })} />
               <span>{label} {checked ? "✓" : ""}</span>
             </label>
           );
@@ -2021,10 +2043,10 @@ function FRInstallDetail({ door, onUpdate, onRefresh }) {
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16}}>
         {FR_INSTALL_CHECKLIST.map(([key, label]) => {
-          const checked = !!door[key];
+          const checked = !!door[frDelBase(key)];
           return (
             <label key={key} className={"chk-card" + (checked ? " done" : "")} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:6,border:"1px solid #334",cursor:"pointer"}}>
-              <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [key]: !checked })} />
+              <input type="checkbox" checked={checked} onChange={() => onUpdate(door.id, { [frDelBase(key)]: !checked })} />
               <span>{label} {checked ? "✓" : ""}</span>
             </label>
           );
