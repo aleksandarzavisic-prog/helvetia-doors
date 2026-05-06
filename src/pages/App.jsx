@@ -1580,11 +1580,7 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
         ))}
       </div>
       <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:12}}>
-        <label className="small">Quantity (pcs)</label>
-        <input type="number" className="inp" placeholder="e.g. 200" value={woodQty}
-          onChange={e => setWoodQty(e.target.value)} style={{width:100}} />
-        <button className="btn" style={{background:"#dc2626"}} disabled={distributing}
-          onClick={distribute}>{distributing ? "..." : "Distribute"}</button>
+        
         {lastDist && <button className="btn" disabled={reversing} onClick={reverseLastDist}>{reversing ? "..." : "Undo last"}</button>}
       </div>
       {distResult && <div className="small" style={{marginTop:-4,marginBottom:8,color:"#4ade80"}}>{distResult}</div>}
