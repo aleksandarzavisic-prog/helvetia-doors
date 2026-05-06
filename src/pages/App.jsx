@@ -550,26 +550,6 @@ function WoodDelivery({ doors, onBulk, onRefresh, onDone }) {
               );
             })}
           </div>
-          <div style={{marginTop:12,display:"flex",justifyContent:"flex-end",gap:8}}>
-            <button className="btn small" disabled={pendingIds.size === 0}
-              onClick={() => setPendingIds(new Set())}>Clear selection</button>
-            <button className="btn" disabled={pendingIds.size === 0 || distributing}
-              onClick={async () => {
-                setDistributing(true);
-                const ups = floorDoors.filter(d => pendingIds.has(d.id)).map(d => {
-                  const done = woodType === "full" ? (d.del_frame && d.del_shutter) : !!d[delKey];
-                  if (woodType === "full") return { id: d.id, patch: { del_frame: !done, del_shutter: !done } };
-                  return { id: d.id, patch: { [delKey]: !done } };
-                });
-                if (ups.length > 0) await onBulk(ups);
-                setPendingIds(new Set());
-                await onRefresh();
-                setDistributing(false);
-              }}
-              style={{background:"#dc2626"}}>
-              {distributing ? "Distributing..." : "Distribute (" + pendingIds.size + ")"}
-            </button>
-          </div>
         </div>
       )}
 
@@ -665,7 +645,6 @@ function DeliveryTab({ doors, types, onUpdate, onBulk, onRefresh, woodKey, bumpW
   // Track last distribution for undo
   const [lastDist, setLastDist] = useState(null); // { hwType, doorIds, label }
   const [reversing, setReversing] = useState(false);
-  const [pendingIds, setPendingIds] = useState(() => new Set());
   const [dPage, setDPage] = useState(0);
   const [pdFloor, setPdFloor] = useState("");
   const [pdApt, setPdApt] = useState("");
@@ -1601,7 +1580,11 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
         ))}
       </div>
       <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:12}}>
-        <span/>
+        <label className="small">Quantity (pcs)</label>
+        <input type="number" className="inp" placeholder="e.g. 200" value={woodQty}
+          onChange={e => setWoodQty(e.target.value)} style={{width:100}} />
+        <button className="btn" style={{background:"#dc2626"}} disabled={distributing}
+          onClick={distribute}>{distributing ? "..." : "Distribute"}</button>
         {lastDist && <button className="btn" disabled={reversing} onClick={reverseLastDist}>{reversing ? "..." : "Undo last"}</button>}
       </div>
       {distResult && <div className="small" style={{marginTop:-4,marginBottom:8,color:"#4ade80"}}>{distResult}</div>}
@@ -1626,8 +1609,15 @@ function FRWoodDelivery({ doors, onBulk, onRefresh }) {
               const done = woodType === "full" ? (d.del_frame && d.del_shutter) : !!d[delKey];
               return (
                 <button key={d.id} className={"btn small" + (done ? " done" : "")}
-                  style={{background: done ? "#166534" : (pendingIds.has(d.id) ? "#ca8a04" : "#1e293b"), border:"1px solid #334", textAlign:"center", padding:"6px 4px"}}
-                  onClick={() => setPendingIds(prev => { const n = new Set(prev); if (n.has(d.id)) n.delete(d.id); else n.add(d.id); return n; })}>
+                  style={{background: done ? "#166534" : "#1e293b", border:"1px solid #334", textAlign:"center", padding:"6px 4px"}}
+                  onClick={async () => {
+                    if (woodType === "full") {
+                      await onBulk([{id: d.id, patch: { del_frame: !done, del_shutter: !done }}]);
+                    } else {
+                      await onBulk([{id: d.id, patch: { [delKey]: !done }}]);
+                    }
+                    await onRefresh();
+                  }}>
                   <div style={{fontSize:12}}>{d.apt_no}</div>
                   <div style={{fontSize:10,opacity:.7}}>{d.door_type}</div>
                 </button>
