@@ -1658,7 +1658,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
   const hwSummary = useMemo(() => {
     return FR_DEL_ALL.filter(([k]) => k !== "del_frame" && k !== "del_shutter").map(([key, label]) => {
       const applicable = doors.filter(d => frApplicableDel(d).includes(key)).length;
-      const done = doors.filter(d => frApplicableDel(d).includes(key) && d[key]).length;
+      const done = doors.filter(d => frApplicableDel(d).includes(key) && d[frDelBase(key)]).length;
       return { key, label, done, applicable, remaining: applicable - done };
     }).filter(s => s.applicable > 0);
   }, [doors]);
