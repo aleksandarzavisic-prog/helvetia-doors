@@ -1781,7 +1781,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
           <tbody>
             {paged.map(d => {
               const appKeys = frApplicableDel(d);
-              const done = appKeys.filter(k => d[k]).length;
+              const done = appKeys.filter(k => d[frDelBase(k)]).length;
               const isOpen = openId === d.id;
               return (
                 <React.Fragment key={d.id}>
@@ -1824,7 +1824,7 @@ function FRDeliveryDetail({ door, onUpdate }) {
       </div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <strong>Delivered hardware</strong>
-        <span className="small">{appKeys.filter(k => door[k]).length}/{appKeys.length} items</span>
+        <span className="small">{appKeys.filter(k => door[frDelBase(k)]).length}/{appKeys.length} items</span>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
         {appItems.map(([key, label]) => {
