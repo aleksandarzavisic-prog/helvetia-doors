@@ -1706,7 +1706,7 @@ function FRDeliveryTab({ doors, onUpdate, onBulk, onRefresh }) {
 
   const floorSummary = useMemo(() => floors.map(f => {
     const fd = doors.filter(d => d.floor === f);
-    const fullyDel = fd.filter(d => frApplicableDel(d).every(k => d[frDelBase(k)])).length;
+    const fullyDel = fd.filter(d => d.del_frame && d.del_shutter).length;
     return { floor: f, total: fd.length, fullyDel, remaining: fd.length - fullyDel };
   }), [doors, floors]);
 
