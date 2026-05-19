@@ -1859,6 +1859,25 @@ function FRDeliveryDetail({ door, onUpdate }) {
 
 /* ── FR Installation Tab ────────────────── */
 function FRInstallTab({ doors, onUpdate, onRefresh }) {
+  /* Bulk install state */
+  const [selBulkItems, setSelBulkItems] = useState(() => new Set());
+  const [bulkFloor, setBulkFloor] = useState("");
+  const [selBulkDoors, setSelBulkDoors] = useState(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const bulkFloors = useMemo(() => [...new Set(doors.map(d => d.floor))].sort(), [doors]);
+  const bulkFloorDoors = useMemo(() => bulkFloor ? doors.filter(d => d.floor === bulkFloor) : [], [doors, bulkFloor]);
+  const toggleBulkItem = (k) => setSelBulkItems(p => { const n = new Set(p); if (n.has(k)) n.delete(k); else n.add(k); return n; });
+  const toggleBulkDoor = (id) => setSelBulkDoors(p => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const runBulkInstall = async (mark) => {
+    if (selBulkItems.size === 0 || selBulkDoors.size === 0) return;
+    setBulkBusy(true);
+    const patch = {};
+    for (const k of selBulkItems) patch[k] = mark;
+    await Promise.all(Array.from(selBulkDoors).map(id => onUpdate(id, patch)));
+    setSelBulkDoors(new Set());
+    await onRefresh();
+    setBulkBusy(false);
+  };
   const [selFloor, setSelFloor] = useState("all");
   const [selApt, setSelApt] = useState("all");
   const [selStatus, setSelStatus] = useState("all");
@@ -1890,6 +1909,62 @@ function FRInstallTab({ doors, onUpdate, onRefresh }) {
 
   return (
     <div>
+      <div className="card" style={{marginBottom:12}}>
+        <h3 style={{marginTop:0}}>Bulk install on floor</h3>
+        <div style={{marginBottom:8}}><span className="small" style={{opacity:.6}}>1. Pick items below, 2. Pick a floor and click doors, 3. Mark or Unmark installed.</span></div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:8}}>
+          {FR_INSTALL_CHECKLIST.map(([k, label]) => {
+            const sel = selBulkItems.has(k);
+            return (
+              <button key={k} className="btn small" onClick={() => toggleBulkItem(k)}
+                style={{background: sel ? "#2563eb" : "#1e293b", color: sel ? "#fff" : "#cbd5e1", border:"1px solid #334"}}>
+                {sel ? "✓ " : ""}{label}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+          <label className="small">Floor:</label>
+          <select className="sel" value={bulkFloor} onChange={e => { setBulkFloor(e.target.value); setSelBulkDoors(new Set()); }}>
+            <option value="">— Select floor —</option>
+            {bulkFloors.map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+        {bulkFloor && (
+          <>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span className="small">{selBulkDoors.size} of {bulkFloorDoors.length} doors selected · {selBulkItems.size} items</span>
+              <div style={{display:"flex",gap:8}}>
+                <button className="btn small" disabled={bulkBusy} onClick={() => setSelBulkDoors(new Set(bulkFloorDoors.map(d => d.id)))}>Select all</button>
+                <button className="btn small" disabled={bulkBusy} onClick={() => setSelBulkDoors(new Set())}>Clear doors</button>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:6,marginBottom:12}}>
+              {bulkFloorDoors.map(d => {
+                const sel = selBulkDoors.has(d.id);
+                return (
+                  <button key={d.id} className="btn small" onClick={() => toggleBulkDoor(d.id)}
+                    style={{background: sel ? "#ca8a04" : "#1e293b", border:"1px solid #334", textAlign:"center", padding:"6px 4px"}}>
+                    {d.apt_no}<br /><small>{d.door_type}</small>
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+              <button className="btn" disabled={bulkBusy || selBulkItems.size === 0 || selBulkDoors.size === 0}
+                onClick={() => runBulkInstall(true)}
+                style={{background:"#16a34a"}}>
+                {bulkBusy ? "..." : "Mark installed (" + selBulkDoors.size + ")"}
+              </button>
+              <button className="btn" disabled={bulkBusy || selBulkItems.size === 0 || selBulkDoors.size === 0}
+                onClick={() => runBulkInstall(false)}
+                style={{background:"#dc2626"}}>
+                {bulkBusy ? "..." : "Mark not installed (" + selBulkDoors.size + ")"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
       <div style={{display:"flex",gap:12,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
         <select className="sel" value={selFloor} onChange={e => { setSelFloor(e.target.value); setSelApt("all"); setPage(0); }}>
           <option value="all">All floors</option>
