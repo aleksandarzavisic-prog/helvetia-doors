@@ -128,10 +128,8 @@ function frDeriveStatus(d) {
   var done = checks.filter(([k])=>d[k]).length;
   if (done===checks.length) return "INSTALLED";
   if (done>0) return "IN_PROGRESS";
-  var delKeys = frApplicableDel(d);
-  var delDone = delKeys.filter(k=>d[k]).length;
-  if (delDone===delKeys.length) return "DELIVERED";
-  if (delDone>0) return "PARTIAL_DEL";
+  if (d.del_frame && d.del_shutter) return "DELIVERED";
+  if (d.del_frame || d.del_shutter) return "PARTIAL_DEL";
   return "PENDING";
 }
 
